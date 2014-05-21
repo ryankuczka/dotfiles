@@ -1,0 +1,6 @@
+*.un~
+*.pyc
+*.swp
+*.swo
+.DS_Store
+tags

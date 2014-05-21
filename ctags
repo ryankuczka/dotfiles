@@ -1,0 +1,3 @@
+--recurse=yes
+--python-kinds=-i
+--languages=-javascript,html

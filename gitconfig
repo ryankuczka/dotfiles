@@ -1,0 +1,26 @@
+[user]
+    name = Ryan Kuczka
+    email = ryan.kuczka@gmail.com
+
+; core variables
+[core]
+    ; Don't trust file modes
+    filemode = false
+    editor = "/usr/local/bin/vim -gf"
+    excludesfile = ~/.gitignore
+
+[color]
+    ui = true
+
+[grep]
+    lineNumber = true
+
+[alias]
+    lg = log --format=format:'%C(yellow)%h - %C(red)%ar%C(reset) %C(green)<%an> %C(reset)%s%C(bold yellow)%d'
+    st = status -sb
+
+[web]
+    browser = open
+
+[push]
+    default = simple
