@@ -4,23 +4,68 @@
 set nocompatible
 filetype off
 
-set rtp+=~/.vim/bundle/vundle/
-call vundle#rc()
-
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
 " {{{1 Load Plug-Ins
+Plugin 'gmarik/vundle'
+
+Plugin 'tpope/vim-fugitive'
+Plugin 'tpope/vim-surround'
+Plugin 'tpope/vim-abolish'
+Plugin 'tpope/vim-unimpaired'
+Plugin 'tpope/vim-repeat'
+Plugin 'tpope/vim-commentary'
+Plugin 'Rename2'
+Plugin 'takac/vim-commandcaps'
+Plugin 'lilydjwg/colorizer'
+Plugin 'bling/vim-airline'
+Plugin 'edkolev/promptline.vim'
+Plugin 'majutsushi/tagbar'
+Plugin 'Valloric/YouCompleteMe'
+Plugin 'sjl/gundo.vim'
+Plugin 'Yggdroot/indentLine'
+Plugin 'suan/vim-instant-markdown'
+Plugin 'rking/ag.vim'
+Plugin 'scrooloose/syntastic'
+Plugin 'kien/ctrlp.vim'
+Plugin 'JazzCore/ctrlp-cmatcher'
+Plugin 'The-NERD-tree'
+Plugin 'ShowTrailingWhitespace'
+Plugin 'DeleteTrailingWhitespace'
+Plugin 'Lokaltog/vim-easymotion'
+Plugin 'godlygeek/tabular'
+Plugin 'airblade/vim-gitgutter'
+Plugin 'kshenoy/vim-signature'
+" {{{2 Color schemes
+Plugin 'jonathanfilip/vim-lucius'
+Plugin 'altercation/vim-colors-solarized'
+Plugin 'nanotech/jellybeans.vim'
+Plugin 'sjl/badwolf'
+Plugin 'vim-scripts/Sorcerer'
+Plugin 'jnurmine/Zenburn'
+Plugin 'tejr/sahara'
+Plugin 'Pychimp/vim-luna'
+Plugin 'matthewtodd/vim-twilight'
+Plugin 'w0ng/vim-hybrid'
+Plugin 'tomasr/molokai'
+" }}}
+" {{{2 Syntax files
+Plugin 'hdima/python-syntax'
+Plugin 'evanmiller/nginx-vim-syntax'
+Plugin 'groenewege/vim-less'
+" }}}
+" }}}
+call vundle#end()
+
+filetype plugin indent on
+
+" {{{1 Configure Plug-Ins
+
 " map leader up here so it takes effect
 let mapleader = ','
 
-Bundle 'gmarik/vundle'
 
 " {{{2 TPope Plug-Ins
-Bundle 'tpope/vim-fugitive'
-Bundle 'tpope/vim-surround'
-Bundle 'tpope/vim-abolish'
-Bundle 'tpope/vim-unimpaired'
-Bundle 'tpope/vim-repeat'
-Bundle 'tpope/vim-commentary'
-
 " open fugitives git status
 nnoremap <Leader>gs :Gstatus<CR>
 " open fugitive's git diff for current file
@@ -35,13 +80,7 @@ nnoremap <Leader>gcd :Git checkout develop<CR>
 nnoremap <Leader>gpl :Git pull origin develop<CR>
 nnoremap <Leader>gpr :Git push ryan <C-R>=fugitive#head()<CR><CR>
 " }}}
-" {{{2 Plug-ins with No Settings
-Bundle 'Rename2'
-Bundle 'takac/vim-commandcaps'
-Bundle 'lilydjwg/colorizer'
-" }}}
 " {{{2 Airline
-Bundle 'bling/vim-airline'
 " Enable powerline fonts
 let g:airline_powerline_fonts=1
 let g:airline_left_sep = ''
@@ -66,125 +105,8 @@ let g:airline#extensions#tagbar#flags = 's'
 "let g:airline#extensions#promptline#color_template = 'visual'
 "let g:airline#extensions#tmuxline#color_template = 'visual'
 " }}}
-" {{{2 Tagbar
-Bundle 'majutsushi/tagbar'
-" }}}
-" {{{2 YouCompleteMe
-Bundle 'Valloric/YouCompleteMe'
-
-set completeopt=menuone
-" ycm preview is cool, but sloooooow :(
-"let g:ycm_add_preview_to_completeopt=1
-"let g:ycm_autoclose_preview_window_after_completion=1
-"let g:ycm_autoclose_preview_window_after_insertion=1
-" }}}
-" Gundo {{{2
-Bundle 'sjl/gundo.vim'
-nnoremap <Leader>u :GundoToggle<CR>
-let g:gundo_preview_bottom=1
-"}}}
-" {{{2 IndentLine
-Bundle 'Yggdroot/indentLine'
-let g:indentLine_char = '┊'
-" }}}
-" {{{2 Instant Markdown
-Bundle 'suan/vim-instant-markdown'
-let g:instant_markdown_slow = 1
-" }}}
-" {{{2 Ag
-Bundle 'rking/ag.vim'
-
-nnoremap <Leader><Leader>f :Ag<Space>
-" }}}
-" {{{2 Syntastic
-Bundle 'scrooloose/syntastic'
-
-map <c-a> :SyntasticCheck<CR>
-let g:syntastic_mode_map = { 'mode': 'passive',
-                           \ 'active_filetypes': [],
-                           \ 'passive_filetypes': [] }
-
-let g:syntastic_auto_loc_list=1
-let g:syntastic_check_on_open=1
-let g:syntastic_python_checkers=["flake8"]
-let g:syntastic_python_flake8_args='--ignore=E501,E128,E261,E262'
-let g:syntastic_javascript_checkers=["jshint"]
-let g:syntastic_javascript_jshint_args='--config /sites/ycharts/confs/developers/jshint_conf.json'
-" }}}
-" {{{2 CtrlP
-Bundle 'kien/ctrlp.vim'
-Bundle 'JazzCore/ctrlp-cmatcher'
-
-let g:ctrlp_working_path_mode='ra'
-let g:ctrlp_max_files=0
-let g:ctrlp_user_command=['.git', 'cd %s && git ls-files . -co --exclude-standard', 'ag %s -l --nocolor -g ""']
-let g:ctrlp_match_func = {'match' : 'matcher#cmatch'}
-" }}}
-" {{{2 NERDTree
-Bundle 'The-NERD-tree'
-
-let NERDTreeIgnore = ['\.pyc$']
-map <leader><c-n> :NERDTreeToggle<CR>
-map <leader><c-l> :NERDTreeFind<CR>
-" }}}
-" {{{2 TrailingWhiteSpace
-Bundle 'ShowTrailingWhitespace'
-Bundle 'DeleteTrailingWhitespace'
-
-nnoremap <Leader>d$ :<C-u>%DeleteTrailingWhitespace<CR>
-let g:DeleteTrailingWhitespace = 1
-" }}}
-" {{{2 Easymotion
-Bundle 'Lokaltog/vim-easymotion'
-let g:EasyMotion_leader_key = '<Leader>'
-" }}}
-" {{{2 Tabularize
-Bundle 'godlygeek/tabular'
-inoremap <silent> <Bar>   <Bar><Esc>:call <SID>align()<CR>a
-
-function! s:align()
-  let p = '^\s*|\s.*\s|\s*$'
-  if exists(':Tabularize') && getline('.') =~# '^\s*|' && (getline(line('.')-1) =~# p || getline(line('.')+1) =~# p)
-    let column = strlen(substitute(getline('.')[0:col('.')],'[^|]','','g'))
-    let position = strlen(matchstr(getline('.')[0:col('.')],'.*|\s*\zs.*'))
-    Tabularize/|/l1
-    normal! 0
-    call search(repeat('[^|]*|',column).'\s\{-\}'.repeat('.',position),'ce',line('.'))
-  endif
-endfunction
-"}}}
-" {{{2 GitGutter
-Bundle 'airblade/vim-gitgutter'
-let g:gitgutter_realtime = 0
-let g:gitgutter_eager = 0
-" }}}
-" {{{2 Signiture
-Bundle 'kshenoy/vim-signature'
-let g:SignatureMarkTextHL = 'SignColumn'
-"}}}
-" Color schemes {{{
-Bundle 'jonathanfilip/vim-lucius'
-Bundle 'altercation/vim-colors-solarized'
-Bundle 'nanotech/jellybeans.vim'
-Bundle 'sjl/badwolf'
-Bundle 'vim-scripts/Sorcerer'
-Bundle 'jnurmine/Zenburn'
-Bundle 'tejr/sahara'
-Bundle 'Pychimp/vim-luna'
-Bundle 'matthewtodd/vim-twilight'
-Bundle 'w0ng/vim-hybrid'
-Bundle 'tomasr/molokai'
-" }}}
-" {{{2 Syntax files
-Bundle 'hdima/python-syntax'
-let python_version_2 = 1
-let python_highlight_all = 1
-Bundle 'evanmiller/nginx-vim-syntax'
-Bundle 'groenewege/vim-less'
-" }}}
-" }}}
-" {{{1 Tmux and Bash
-Bundle 'edkolev/promptline.vim'
+" {{{2 Promptline
+" {{{3 Promptline Funcs
 let git_modified_slice = {
     \'function_name' : 'git_modified',
     \'function_body' : [
@@ -231,6 +153,7 @@ let git_ahead_behind_slice = {
         \'  [[ $behind_count -gt 0 ]] && { printf "%s" "$leading_whitespace$behind_count$behind_symbol"; leading_whitespace=" "; }',
         \'  [[ $ahead_count -gt 0 ]]  && { printf "%s" "$leading_whitespace$ahead_count$ahead_symbol"; leading_whitespace=" "; }',
         \'}']}
+" }}}
 let g:promptline_preset = {
     \'a' : [ promptline#slices#python_virtualenv() ],
     \'b' : [ promptline#slices#user(), promptline#slices#host() ],
@@ -240,9 +163,86 @@ let g:promptline_preset = {
     \'warn': [ promptline#slices#last_exit_code() ]}
 let g:promptline_theme = 'airline'
 " }}}
+" {{{2 YouCompleteMe
+
+set completeopt=menuone
+" ycm preview is cool, but sloooooow :(
+"let g:ycm_add_preview_to_completeopt=1
+"let g:ycm_autoclose_preview_window_after_completion=1
+"let g:ycm_autoclose_preview_window_after_insertion=1
+" }}}
+" Gundo {{{2
+nnoremap <Leader>u :GundoToggle<CR>
+let g:gundo_preview_bottom=1
+"}}}
+" {{{2 IndentLine
+let g:indentLine_char = '┊'
+" }}}
+" {{{2 Instant Markdown
+let g:instant_markdown_slow = 1
+" }}}
+" {{{2 Ag
+nnoremap <Leader><Leader>f :Ag<Space>
+" }}}
+" {{{2 Syntastic
+map <c-a> :SyntasticCheck<CR>
+let g:syntastic_mode_map = { 'mode': 'passive',
+                           \ 'active_filetypes': [],
+                           \ 'passive_filetypes': [] }
+
+let g:syntastic_auto_loc_list=1
+let g:syntastic_check_on_open=1
+let g:syntastic_python_checkers=["flake8"]
+let g:syntastic_python_flake8_args='--ignore=E501,E128,E261,E262'
+let g:syntastic_javascript_checkers=["jshint"]
+let g:syntastic_javascript_jshint_args='--config /sites/ycharts/confs/developers/jshint_conf.json'
+" }}}
+" {{{2 CtrlP
+let g:ctrlp_working_path_mode='ra'
+let g:ctrlp_max_files=0
+let g:ctrlp_user_command=['.git', 'cd %s && git ls-files . -co --exclude-standard', 'ag %s -l --nocolor -g ""']
+let g:ctrlp_match_func = {'match' : 'matcher#cmatch'}
+" }}}
+" {{{2 NERDTree
+let NERDTreeIgnore = ['\.pyc$']
+map <leader><c-n> :NERDTreeToggle<CR>
+map <leader><c-l> :NERDTreeFind<CR>
+" }}}
+" {{{2 TrailingWhiteSpace
+nnoremap <Leader>d$ :<C-u>%DeleteTrailingWhitespace<CR>
+let g:DeleteTrailingWhitespace = 1
+" }}}
+" {{{2 Easymotion
+let g:EasyMotion_leader_key = '<Leader>'
+" }}}
+" {{{2 Tabularize
+inoremap <silent> <Bar>   <Bar><Esc>:call <SID>align()<CR>a
+
+function! s:align()
+  let p = '^\s*|\s.*\s|\s*$'
+  if exists(':Tabularize') && getline('.') =~# '^\s*|' && (getline(line('.')-1) =~# p || getline(line('.')+1) =~# p)
+    let column = strlen(substitute(getline('.')[0:col('.')],'[^|]','','g'))
+    let position = strlen(matchstr(getline('.')[0:col('.')],'.*|\s*\zs.*'))
+    Tabularize/|/l1
+    normal! 0
+    call search(repeat('[^|]*|',column).'\s\{-\}'.repeat('.',position),'ce',line('.'))
+  endif
+endfunction
+"}}}
+" {{{2 GitGutter
+let g:gitgutter_realtime = 0
+let g:gitgutter_eager = 0
+" }}}
+" {{{2 Signiture
+let g:SignatureMarkTextHL = 'SignColumn'
+"}}}
+" {{{2 Python Syntax
+let python_version_2 = 1
+let python_highlight_all = 1
+" }}}
+" }}}
 " {{{1 Standard Options
 " {{{2 Syntax, View, and Window
-filetype plugin indent on
 syntax on
 
 set t_Co=256       " sets the number of colors to 256
@@ -370,7 +370,7 @@ nmap <F10> :echo "hi<" .synIDattr(synID(line('.'),col('.'),1),'name'). '> trans<
 " }}}
 " {{{1 Functions
 " Function to insert a debug trace for python and javascript and map to Ctrl-i
-nnoremap <c-i> :call InsertDebugTrace()<CR>
+nnoremap <Leader><c-i> :call InsertDebugTrace()<CR>
 function! InsertDebugTrace()
     if (&ft == 'python')
         normal! Oimport ipdb; ipdb.set_trace()
