@@ -26,7 +26,7 @@ export CLICOLOR=1
 alias tn="/Applications/terminal-notifier.app/Contents/MacOS/terminal-notifier -message \"Process has finished\""
 alias nw="/Applications/node-webkit.app/Contents/MacOS/node-webkit"
 alias tree="tree -I \*.pyc\|\*.un~\|\*.sw[op]\|\*node_modules\*\|%\*\|.DS_Store -Ca"
-alias sp="python manage.py shell_plus"
+alias sp="python manage.py shell_plus --ipython"
 alias rs="python manage.py runserver 0.0.0.0:8000"
 alias git="hub"
 

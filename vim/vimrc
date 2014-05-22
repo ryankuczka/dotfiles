@@ -64,7 +64,6 @@ filetype plugin indent on
 " map leader up here so it takes effect
 let mapleader = ','
 
-
 " {{{2 TPope Plug-Ins
 " open fugitives git status
 nnoremap <Leader>gs :Gstatus<CR>
@@ -185,7 +184,7 @@ let g:instant_markdown_slow = 1
 nnoremap <Leader><Leader>f :Ag<Space>
 " }}}
 " {{{2 Syntastic
-map <c-a> :SyntasticCheck<CR>
+nnoremap <C-A> :SyntasticCheck<CR>
 let g:syntastic_mode_map = { 'mode': 'passive',
                            \ 'active_filetypes': [],
                            \ 'passive_filetypes': [] }
@@ -201,15 +200,18 @@ let g:syntastic_javascript_jshint_args='--config /sites/ycharts/confs/developers
 let g:ctrlp_working_path_mode='ra'
 let g:ctrlp_max_files=0
 let g:ctrlp_user_command=['.git', 'cd %s && git ls-files . -co --exclude-standard', 'ag %s -l --nocolor -g ""']
-let g:ctrlp_match_func = {'match' : 'matcher#cmatch'}
+let g:ctrlp_match_func={'match' : 'matcher#cmatch'}
+let g:ctrlp_extensions=['buffertag']
+let g:ctrlp_mruf_relative=1
+nnoremap <Leader><C-P> :CtrlPBufTag<CR>
 " }}}
 " {{{2 NERDTree
 let NERDTreeIgnore = ['\.pyc$']
-map <leader><c-n> :NERDTreeToggle<CR>
-map <leader><c-l> :NERDTreeFind<CR>
+map <Leader><C-N> :NERDTreeToggle<CR>
+map <Leader><C-L> :NERDTreeFind<CR>
 " }}}
 " {{{2 TrailingWhiteSpace
-nnoremap <Leader>d$ :<C-u>%DeleteTrailingWhitespace<CR>
+nnoremap <Leader>d$ :<C-U>%DeleteTrailingWhitespace<CR>
 let g:DeleteTrailingWhitespace = 1
 " }}}
 " {{{2 Easymotion
@@ -304,7 +306,7 @@ set t_RV= ttymouse=xterm2
 
 set autoread       " when a file is changed by a program other than vim while a buffer is open, automatically reload it
 
-set nostartofline  " makes it so G, gg, <c-d>, etc. don't move cursor to start of the line
+set nostartofline  " makes it so G, gg, <C-D>, etc. don't move cursor to start of the line
 
 set modeline       " Allow for modelines
 set modelines=1    " Only check 1 modeline
@@ -323,7 +325,7 @@ noremap J 10j
 noremap K 10k
 
 noremap <Leader>J Jx
-noremap <Leader><c-j> J
+noremap <Leader><C-J> J
 
 " Set <Space> to enter command
 nnoremap <Space> :
@@ -350,15 +352,15 @@ nnoremap Q @q
 noremap <Leader><Leader><Space> <C-^>
 
 " Easy switch between panes
-nnoremap <m-h> <c-w>h
-nnoremap <m-j> <c-w>j
-nnoremap <m-k> <c-w>k
-nnoremap <m-l> <c-w>l
+nnoremap <M-H> <C-W>h
+nnoremap <M-J> <C-W>j
+nnoremap <M-K> <C-W>k
+nnoremap <M-L> <C-W>l
 " Easy resizing of panes
-nnoremap <m-+> <c-w>+
-nnoremap <m--> <c-w>-
-nnoremap <m->> <c-w>>
-nnoremap <m-<> <c-w><
+nnoremap <M-+> <C-W>+
+nnoremap <M--> <C-W>-
+nnoremap <M->> <C-W>>
+nnoremap <M-<> <C-W><
 "
 " Maps \cp to yank the current file path to the unnamed register
 nmap <Leader>cp :let @" = &filetype . ' ' . expand("%:p") . "\n"<CR>
@@ -367,10 +369,15 @@ nmap <Leader>cp :let @" = &filetype . ' ' . expand("%:p") . "\n"<CR>
 nmap <F10> :echo "hi<" .synIDattr(synID(line('.'),col('.'),1),'name'). '> trans<'
             \ .synIDattr(synID(line('.'),col('.'),0),'name'). '> lo<'
             \ .synIDattr(synIDtrans(synID(line('.'),col('.'),1)),'name'). '>'<CR>
+
+" Add the <C-A> and <C-E> commands to insert/command modes
+inoremap <C-A> <C-O>^
+inoremap <C-E> <C-O>$
+cnoremap <C-A> <Home>
 " }}}
 " {{{1 Functions
 " Function to insert a debug trace for python and javascript and map to Ctrl-i
-nnoremap <Leader><c-i> :call InsertDebugTrace()<CR>
+nnoremap <Leader><C-I> :call InsertDebugTrace()<CR>
 function! InsertDebugTrace()
     if (&ft == 'python')
         normal! Oimport ipdb; ipdb.set_trace()
