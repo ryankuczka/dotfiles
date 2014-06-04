@@ -1,0 +1,4 @@
+migrations
+tags
+node_modules
+.git/**

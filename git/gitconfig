@@ -6,7 +6,7 @@
 [core]
     ; Don't trust file modes
     filemode = false
-    editor = "/usr/local/bin/vim -gf"
+    editor = "/usr/local/bin/vim -f"
     excludesfile = ~/.gitignore
 
 [color]
@@ -18,9 +18,13 @@
 [alias]
     lg = log --format=format:'%C(yellow)%h - %C(red)%ar%C(reset) %C(green)<%an> %C(reset)%s%C(bold yellow)%d'
     st = status -sb
+	ctags = !.git/hooks/ctags
 
 [web]
     browser = open
 
 [push]
     default = simple
+
+[init]
+    templatedir = ~/.git_template

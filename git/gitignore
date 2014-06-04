@@ -1,0 +1,7 @@
+*.un~
+*.pyc
+*.sw[po]
+.DS_Store
+tags
+.env
+node_modules/*
