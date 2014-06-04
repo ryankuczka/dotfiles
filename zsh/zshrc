@@ -1,0 +1,116 @@
+#############
+# ZSH OPTIONS
+#############
+setopt HIST_IGNORE_ALL_DUPS
+
+#################
+# TERMINAL COLORS
+#################
+[[ -f $HOME/.ryan-base16-colors.sh ]] && source $HOME/.ryan-base16-colors.sh
+
+###################
+# PATH MANIPULATION
+###################
+export PATH=/usr/local/bin:$PATH
+# MySQL PATH variables
+export PATH=$PATH:/usr/local/mysql/bin
+# MySQL Libraries
+export DYLD_LIBRARY_PATH=/usr/local/mysql/lib
+export PATH=$PATH:/Users/ryan/bin
+# NPM binaries
+export PATH=$PATH:/usr/local/share/npm/bin
+
+###################
+# PYTHON VIRTUALENV
+###################
+export WORKON_HOME=$HOME/.virtualenvs
+export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python
+export VIRTUAL_ENV_DISABLE_PROMPT=1
+source /usr/local/bin/virtualenvwrapper.sh
+
+#######################
+#
+# Oh-My-Zsh via Antigen
+#
+#######################
+export ENABLE_CORRECTION="true"
+export PROMPT_EOL_MARK=""
+source $HOME/.antigen/antigen.zsh
+
+# Use Oh-My-Zsh's /lib/
+antigen use oh-my-zsh
+
+# Oh-My-Zsh plugins
+antigen bundle autoenv
+antigen bundle brew
+antigen bundle celery
+antigen bundle colored-man
+antigen bundle django
+antigen bundle fabric
+antigen bundle git
+antigen bundle jsontools
+antigen bundle node
+antigen bundle npm
+antigen bundle osx
+antigen bundle pip
+antigen bundle python
+antigen bundle redis-cli
+antigen bundle urltools
+antigen bundle web-search
+antigen bundle zsh_reload
+# Command line syntax highlighting!
+antigen bundle zsh-users/zsh-syntax-highlighting
+# Auto environments!
+antigen bundle kennethreitz/autoenv
+
+antigen apply
+
+##################
+# FANCY PROMPTLINE
+##################
+ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
+[[ -f $HOME/.prompt.zsh ]] && source $HOME/.prompt.zsh
+
+#####################
+# BASIC ENV VARIABLES
+#####################
+# Don't edit default merge commit messages
+export GIT_MERGE_AUTOEDIT=no
+# Set editor to gvim
+export EDITOR="/usr/local/bin/vim -f"
+export CLICOLOR=1
+
+# Aliases
+tn() {
+    local message="Process has finished"
+    if [[ $1 == "-message" ]]; then
+        message=$2
+        shift; shift;
+    fi
+    local prog=$1
+    shift
+    $prog $@
+    /Applications/terminal-notifier.app/Contents/MacOS/terminal-notifier -message "$message" -subtitle "$prog" > /dev/null
+}
+alias nw="/Applications/node-webkit.app/Contents/MacOS/node-webkit"
+alias tree="tree -I '*.pyc|*.un~|*.sw[op]|*node_modules*|%*|.DS_Store' -Ca"
+alias sp="python manage.py shell_plus --ipython"
+alias rs="python manage.py runserver 0.0.0.0:8000"
+alias pman="man-preview"
+
+alias git="hub"
+alias gss="git status -sb"
+alias glg="git --no-pager log -n 25 --format=format:'%C(reset)%C(yellow)%h - %C(red)%ar%C(reset) %C(green)<%an> %C(reset)%s%C(bold yellow)%d'"
+alias glgg="git log --format=format:'%C(reset)%C(yellow)%h - %C(red)%ar%C(reset) %C(green)<%an> %C(reset)%s%C(bold yellow)%d'"
+alias gstl="git --no-pager stash list"
+
+# Ruby binaries
+PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
+export PATH=$PATH:/usr/local/opt/ruby/bin
+
+rvm use 1.9.3 > /dev/null
+
+###########
+# Heroku
+###########
+export PATH="$PATH:/usr/local/heroku/bin"
