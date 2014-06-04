@@ -1,0 +1,12 @@
+#!/bin/bash
+set -e
+trap "rm -f .git/tags.$$" EXIT
+
+/usr/local/bin/ctags \
+    --tag-relative \
+    -Rf.git/tags.$$ \
+    --exclude=.git \
+    --languages=-javascript,sql,html \
+    --python-kinds=-i
+
+mv .git/tags.$$ .git/tags
