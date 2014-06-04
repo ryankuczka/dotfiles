@@ -7,7 +7,7 @@ filetype off
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 " {{{1 Load Plug-Ins
-Plugin 'gmarik/vundle'
+Plugin 'gmarik/Vundle.vim'
 
 Plugin 'tpope/vim-fugitive'
 Plugin 'tpope/vim-surround'
@@ -36,6 +36,7 @@ Plugin 'Lokaltog/vim-easymotion'
 Plugin 'godlygeek/tabular'
 Plugin 'airblade/vim-gitgutter'
 Plugin 'kshenoy/vim-signature'
+Plugin 'SirVer/ultisnips'
 " {{{2 Color schemes
 Plugin 'jonathanfilip/vim-lucius'
 Plugin 'altercation/vim-colors-solarized'
@@ -162,6 +163,10 @@ let g:promptline_preset = {
     \'warn': [ promptline#slices#last_exit_code() ]}
 let g:promptline_theme = 'airline'
 " }}}
+" UltiSnips {{{2
+let g:UltiSnipsEditSplit = 'vertical'
+let g:UltiSnipsExpandTrigger = '<C-E>'
+" }}}
 " {{{2 YouCompleteMe
 
 set completeopt=menuone
@@ -248,14 +253,9 @@ let python_highlight_all = 1
 syntax on
 
 set t_Co=256       " sets the number of colors to 256
-colorscheme lucius
-"set background=dark
-LuciusDarkLowContrast
-hi SignColumn guifg=#5fafd7 guibg=#444444
-"hi Special term=bold ctermfg=167 gui=bold guifg=#cc6666
+let g:base16colorspace = 256
+colorscheme ryan-base16
 
-" set both types of number to have abs number instead of zero in rnu
-set relativenumber
 set number
 set incsearch      " highlights as you search
 set hlsearch       " highlights search results
@@ -264,13 +264,18 @@ set scrolloff=3    " ensures that at least 3 lines of context are always visible
 
 set laststatus=2
 set noshowmode
-set noruler          " shows line,col in bottom right
+set noruler        " shows line,col in bottom right
 set showcmd        " shows the partial command in the lower right
-set list listchars=tab:⇥⇥ " turns hard tabs into this character
+set list listchars=tab:,extends:,precedes:  ",trail:☐  " turns hard tabs into this character
 
 if has('gui_running')
     set guifont=Sauce\ Code\ Powerline:h13
     set guioptions=egmrt
+endif
+
+if &term =~ '^xterm'
+    let &t_SI = "\<Esc>[6 q"
+    let &t_EI = "\<Esc>[2 q"
 endif
 " }}}
 " {{{2 <Tab> and Indenting
@@ -310,6 +315,8 @@ set nostartofline  " makes it so G, gg, <C-D>, etc. don't move cursor to start o
 
 set modeline       " Allow for modelines
 set modelines=1    " Only check 1 modeline
+
+set sessionoptions-=options
 
 if exists('&macmeta')
     set macmeta
@@ -374,18 +381,19 @@ nmap <F10> :echo "hi<" .synIDattr(synID(line('.'),col('.'),1),'name'). '> trans<
 inoremap <C-A> <C-O>^
 inoremap <C-E> <C-O>$
 cnoremap <C-A> <Home>
+
+" Insert debugger/ipdb statement
+nnoremap <Leader><C-I> :call InsertDebugTrace()<CR>
 " }}}
 " {{{1 Functions
-" Function to insert a debug trace for python and javascript and map to Ctrl-i
-nnoremap <Leader><C-I> :call InsertDebugTrace()<CR>
-function! InsertDebugTrace()
+function! InsertDebugTrace() "{{{
     if (&ft == 'python')
         normal! Oimport ipdb; ipdb.set_trace()
     elseif (&ft == 'javascript')
         normal! Odebugger;
     endif
-    :w
-endfunction
+    :w!
+endfunction "}}}
 " }}}
 " Auto Commands {{{1
 " Automatically set html files to be htmldjango filetype
@@ -396,7 +404,7 @@ augroup FileTypeConfs
     autocmd BufRead,BufNewFile *.md set filetype=markdown
     autocmd BufRead *nginx_ycharts* set filetype=nginx
     autocmd BufRead *ycharts*cron.txt set filetype=crontab
-    autocmd BufRead .iterm_profiles,.shell_prompt.sh call SetFileTypeSH("bash")
+    autocmd BufRead *.sh :call SetFileTypeSH("bash")
     autocmd QuickFixCmdPost *grep* cwindow
 augroup END
 
@@ -404,9 +412,7 @@ augroup END
 augroup CursorLine
     autocmd!
     autocmd VimEnter,WinEnter,BufWinEnter * setlocal cursorline
-    autocmd VimEnter,WinEnter,BufWinEnter * setlocal cursorcolumn
     autocmd WinLeave * setlocal nocursorline
-    autocmd WinLeave * setlocal nocursorcolumn
 augroup END
 "}}}
 
