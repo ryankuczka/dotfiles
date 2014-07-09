@@ -20,8 +20,7 @@ Plugin 'takac/vim-commandcaps'
 Plugin 'lilydjwg/colorizer'
 Plugin 'bling/vim-airline'
 Plugin 'edkolev/promptline.vim'
-Plugin 'majutsushi/tagbar'
-Plugin 'Valloric/YouCompleteMe'
+" Plugin 'Valloric/YouCompleteMe'
 Plugin 'sjl/gundo.vim'
 Plugin 'Yggdroot/indentLine'
 Plugin 'suan/vim-instant-markdown'
@@ -37,25 +36,20 @@ Plugin 'godlygeek/tabular'
 Plugin 'airblade/vim-gitgutter'
 Plugin 'kshenoy/vim-signature'
 Plugin 'SirVer/ultisnips'
+Plugin 'kien/rainbow_parentheses.vim'
+Plugin 'Shougo/neocomplete.vim'
+Plugin 'davidhalter/jedi-vim'
 " {{{2 Color schemes
 Plugin 'jonathanfilip/vim-lucius'
 Plugin 'altercation/vim-colors-solarized'
 Plugin 'nanotech/jellybeans.vim'
-Plugin 'sjl/badwolf'
-Plugin 'vim-scripts/Sorcerer'
-Plugin 'jnurmine/Zenburn'
-Plugin 'tejr/sahara'
-Plugin 'Pychimp/vim-luna'
-Plugin 'matthewtodd/vim-twilight'
 Plugin 'w0ng/vim-hybrid'
-Plugin 'tomasr/molokai'
-" }}}
 " {{{2 Syntax files
 Plugin 'hdima/python-syntax'
+Plugin 'pangloss/vim-javascript'
 Plugin 'evanmiller/nginx-vim-syntax'
 Plugin 'groenewege/vim-less'
-" }}}
-" }}}
+" }}}1
 call vundle#end()
 
 filetype plugin indent on
@@ -66,141 +60,59 @@ filetype plugin indent on
 let mapleader = ','
 
 " {{{2 TPope Plug-Ins
-" open fugitives git status
 nnoremap <Leader>gs :Gstatus<CR>
-" open fugitive's git diff for current file
-nnoremap <Leader>gd :Gdiff<CR>
-" close the fugitive diff pane
-nnoremap <Leader>gD <C-W>c
 " open the current file on github
 nnoremap <Leader>gb :<C-R>=line('.')<CR>Gbrowse@ryan<CR>
 vnoremap <Leader>gb :Gbrowse@ryan<CR>
-" pull/push
-nnoremap <Leader>gcd :Git checkout develop<CR>
-nnoremap <Leader>gpl :Git pull origin develop<CR>
-nnoremap <Leader>gpr :Git push ryan <C-R>=fugitive#head()<CR><CR>
-" }}}
+" {{{2 Neocomplete
+let g:neocomplete#enable_at_startup = 1
+let g:neocomplete#enable_smart_case = 1
+if !exists('g:neocomplete#force_omni_input_patterns')
+  let g:neocomplete#force_omni_input_patterns = {}
+endif
+let g:neocomplete#force_omni_input_patterns.python =
+      \ '\%([^. \t]\.\|^\s*@\|^\s*from\s.\+import \|^\s*from \|^\s*import \)\w*'
+" Testing out recommended key mappings
+" <CR>: Close popup and save indent
+inoremap <silent> <CR> <C-R>=<SID>my_cr_function()<CR>
+function! s:my_cr_function()
+  return pumvisible() ? neocomplete#close_popup() : "\<CR>"
+endfunction
+" <Tab> completion
+inoremap <silent> <Tab> <C-R>=<SID>my_tab_function()<CR>
+function! s:my_tab_function()
+  return pumvisible() ? "\<C-N>" : "\<Tab>"
+endfunction
+" {{{2 Jedi
+let g:jedi#auto_vim_configuration = 0
+let g:jedi#auto_initialization = 0
+let g:jedi#popup_select_first = 0
+let g:jedi#completions_enabled = 0
 " {{{2 Airline
-" Enable powerline fonts
 let g:airline_powerline_fonts=1
-let g:airline_left_sep = ''
-let g:airline_left_alt_sep = ''
-let g:airline_right_sep = ''
-let g:airline_right_alt_sep = ''
-let g:airline#extensions#branch#symbol = ' '
-let g:airline#extensions#readonly#symbol = ''
-let g:airline_linecolumn_prefix = ' '
-
-let g:airline_theme='lucius'
-
-let g:airline#extensions#branch#enabled = 1
-let g:airline#extensions#branch#empty_message = ''
-let g:airline#extensions#syntastic#enabled = 1
+let g:airline_theme='jellybeans'
 let g:airline#extensions#hunks#non_zero_only = 1
-let g:airline#extensions#tabline#enabled = 0
-let g:airline#extensions#tagbar#enabled = 1
-let g:airline#extensions#tagbar#flags = 's'
-"let g:airline#extensions#promptline#snapshot_file = "~/.shell_prompt.sh"
-"let g:airline#extensions#promptline#enabled = 1
-"let g:airline#extensions#promptline#color_template = 'visual'
-"let g:airline#extensions#tmuxline#color_template = 'visual'
-" }}}
-" {{{2 Promptline
-" {{{3 Promptline Funcs
-let git_modified_slice = {
-    \'function_name' : 'git_modified',
-    \'function_body' : [
-        \'function git_modified {',
-        \'  [[ $(git rev-parse --is-inside-work-tree 2>/dev/null) == true ]] || return 1',
-        \'  local modified_count=0 unmerged_count=0 added_count=0',
-        \'  local modified_symbol="M" unmerged_symbol="U" added_symbol="A"',
-        \'  while read line; do',
-        \'    case "$line" in',
-        \'      M*) modified_count=$(( $modified_count + 1 )) ;;',
-        \'      U*) unmerged_count=$(( $unmerged_count + 1 )) ;;',
-        \'    esac',
-        \'  done < <(git diff --name-status)',
-        \'  while read line; do',
-        \'    case "$line" in',
-        \'      *) added_count=$(( $added_count + 1 )) ;;',
-        \'    esac',
-        \'  done < <(git diff --name-status --cached)',
-        \'  local leading_whitespace=""',
-        \'  [[ $modified_count -gt 0 ]] && { printf "%s" "$leading_whitespace$modified_count$modified_symbol"; leading_whitespace=" "; }',
-        \'  [[ $unmerged_count -gt 0 ]] && { printf "%s" "$leading_whitespace$unmerged_count$unmerged_symbol"; leading_whitespace=" "; }',
-        \'  [[ $added_count -gt 0 ]]    && { printf "%s" "$leading_whitespace$added_count$added_symbol"; leading_whitespace=" "; }',
-        \'}']}
-let git_untracked_slice = {
-    \'function_name' : 'git_untracked',
-    \'function_body' : [
-        \'function git_untracked {',
-        \'  [[ $(git rev-parse --is-inside-work-tree 2>/dev/null) == true ]] || return 1',
-        \'  if [ -n "$(git ls-files --others --exclude-standard)" ]; then',
-        \'    echo "+"',
-        \'  fi',
-        \'}']}
-let git_ahead_behind_slice = {
-    \'function_name' : 'git_ahead_behind',
-    \'function_body' : [
-        \'function git_ahead_behind {',
-        \'  [[ $(git rev-parse --is-inside-work-tree 2>/dev/null) == true ]] || return 1',
-        \'  set -- $(git rev-list --left-right --count @{upstream}...HEAD 2>/dev/null)',
-        \'  local behind_count=$1',
-        \'  local ahead_count=$2',
-        \'  local ahead_symbol="↑"',
-        \'  local behind_symbol="↓"',
-        \'  local leading_whitespace=""',
-        \'  [[ $behind_count -gt 0 ]] && { printf "%s" "$leading_whitespace$behind_count$behind_symbol"; leading_whitespace=" "; }',
-        \'  [[ $ahead_count -gt 0 ]]  && { printf "%s" "$leading_whitespace$ahead_count$ahead_symbol"; leading_whitespace=" "; }',
-        \'}']}
-" }}}
-let g:promptline_preset = {
-    \'a' : [ promptline#slices#python_virtualenv() ],
-    \'b' : [ promptline#slices#user(), promptline#slices#host() ],
-    \'c' : [ promptline#slices#cwd() ],
-    \'y' : [ promptline#slices#vcs_branch() ],
-    \'z' : [ git_ahead_behind_slice, git_modified_slice, git_untracked_slice ],
-    \'warn': [ promptline#slices#last_exit_code() ]}
-let g:promptline_theme = 'airline'
-" }}}
 " UltiSnips {{{2
 let g:UltiSnipsEditSplit = 'vertical'
 let g:UltiSnipsExpandTrigger = '<C-E>'
-" }}}
-" {{{2 YouCompleteMe
-
-set completeopt=menuone
-" ycm preview is cool, but sloooooow :(
-"let g:ycm_add_preview_to_completeopt=1
-"let g:ycm_autoclose_preview_window_after_completion=1
-"let g:ycm_autoclose_preview_window_after_insertion=1
-" }}}
 " Gundo {{{2
 nnoremap <Leader>u :GundoToggle<CR>
 let g:gundo_preview_bottom=1
-"}}}
 " {{{2 IndentLine
 let g:indentLine_char = '┊'
-" }}}
 " {{{2 Instant Markdown
 let g:instant_markdown_slow = 1
-" }}}
 " {{{2 Ag
 nnoremap <Leader><Leader>f :Ag<Space>
-" }}}
 " {{{2 Syntastic
-nnoremap <C-A> :SyntasticCheck<CR>
-let g:syntastic_mode_map = { 'mode': 'passive',
-                           \ 'active_filetypes': [],
-                           \ 'passive_filetypes': [] }
-
+nnoremap <C-S> :SyntasticCheck<CR>
+let g:syntastic_mode_map = {'mode': 'passive'}
 let g:syntastic_auto_loc_list=1
 let g:syntastic_check_on_open=1
 let g:syntastic_python_checkers=["flake8"]
 let g:syntastic_python_flake8_args='--ignore=E501,E128,E261,E262'
 let g:syntastic_javascript_checkers=["jshint"]
 let g:syntastic_javascript_jshint_args='--config /sites/ycharts/confs/developers/jshint_conf.json'
-" }}}
 " {{{2 CtrlP
 let g:ctrlp_working_path_mode='ra'
 let g:ctrlp_max_files=0
@@ -209,45 +121,23 @@ let g:ctrlp_match_func={'match' : 'matcher#cmatch'}
 let g:ctrlp_extensions=['buffertag']
 let g:ctrlp_mruf_relative=1
 nnoremap <Leader><C-P> :CtrlPBufTag<CR>
-" }}}
 " {{{2 NERDTree
 let NERDTreeIgnore = ['\.pyc$']
 map <Leader><C-N> :NERDTreeToggle<CR>
-map <Leader><C-L> :NERDTreeFind<CR>
-" }}}
 " {{{2 TrailingWhiteSpace
 nnoremap <Leader>d$ :<C-U>%DeleteTrailingWhitespace<CR>
 let g:DeleteTrailingWhitespace = 1
-" }}}
 " {{{2 Easymotion
 let g:EasyMotion_leader_key = '<Leader>'
-" }}}
-" {{{2 Tabularize
-inoremap <silent> <Bar>   <Bar><Esc>:call <SID>align()<CR>a
-
-function! s:align()
-  let p = '^\s*|\s.*\s|\s*$'
-  if exists(':Tabularize') && getline('.') =~# '^\s*|' && (getline(line('.')-1) =~# p || getline(line('.')+1) =~# p)
-    let column = strlen(substitute(getline('.')[0:col('.')],'[^|]','','g'))
-    let position = strlen(matchstr(getline('.')[0:col('.')],'.*|\s*\zs.*'))
-    Tabularize/|/l1
-    normal! 0
-    call search(repeat('[^|]*|',column).'\s\{-\}'.repeat('.',position),'ce',line('.'))
-  endif
-endfunction
-"}}}
 " {{{2 GitGutter
 let g:gitgutter_realtime = 0
 let g:gitgutter_eager = 0
-" }}}
-" {{{2 Signiture
+" {{{2 Signature
 let g:SignatureMarkTextHL = 'SignColumn'
-"}}}
 " {{{2 Python Syntax
-let python_version_2 = 1
-let python_highlight_all = 1
-" }}}
-" }}}
+let g:python_version_2 = 1
+let g:python_highlight_all = 1
+let g:python_highlight_space_errors = 0
 " {{{1 Standard Options
 " {{{2 Syntax, View, and Window
 syntax on
@@ -266,82 +156,73 @@ set laststatus=2
 set noshowmode
 set noruler        " shows line,col in bottom right
 set showcmd        " shows the partial command in the lower right
-set list listchars=tab:,extends:,precedes:  ",trail:☐  " turns hard tabs into this character
+set list listchars=tab:,extends:,precedes:  " turns hard tabs into this character
 
+" Sets GUI Font and options
 if has('gui_running')
-    set guifont=Sauce\ Code\ Powerline:h13
-    set guioptions=egmrt
+  set guifont=Sauce\ Code\ Powerline:h13
+  set guioptions=egmrt
 endif
 
+" Sets cursor to a bar in insert mode
 if &term =~ '^xterm'
-    let &t_SI = "\<Esc>[6 q"
-    let &t_EI = "\<Esc>[2 q"
+  let &t_SI = "\<Esc>[5 q"
+  let &t_EI = "\<Esc>[2 q"
 endif
-" }}}
 " {{{2 <Tab> and Indenting
 set tabstop=4      " sets the length of the tab to 4 spaces
 set shiftwidth=4   " sets the (auto)indent to 4 spaces
 set softtabstop=4  " sets number of spaces to insert for a <Tab>
 set smarttab       " a <Tab> will insert 'shiftwidth' spaces
 set expandtab      " a <Tab> is expanded to spaces in Insert mode
-" }}}
+set autoindent     " auto indents
 " {{{2 Command Line
 set wildmode=longest,list,full " specifies that pressing <Tab> will complete to longest common substring, then a list of options, then cycle through all options
 set wildmenu       " command line completion will show a menu of matches
 set wildignore=*.pyc " patterns to ignore for file name completion
-" }}}
 " {{{2 Folding
 set foldmethod=marker " allows setting a marker to specify where a fold occurs
 set foldmarker={{{,}}} " sets the fold marker to {{{ to start and }}} to end
 set foldlevel=99
-" }}}
 " {{{2 Buffers, Search
 set ignorecase     " ignores case for search
 set smartcase      " overrides ignorecase if search pattern has upper case letters
-
+set gdefault       " defaults to the `g` flag for :s substitutions
 set hidden         " doesn't unload a buffer when it is no longer in a window
-set eol            " ensures the last line in the file has an end of line
-" }}}
 " {{{2 Etc.
+set completeopt=menuone " show completion menu even if only one match
+set eol            " ensures the last line in the file has an end of line
 set virtualedit=block " only allows the cursor to go where there is no character in Visual Block mode
 set undofile       " save/restore undo history
-set undodir=~/.vim/undodir
-set autoindent     " auto indents
+set undodir=~/.vim/undodir " store undo files in ~/.vim/undodir
 set t_RV= ttymouse=xterm2
+set mouse=a
 
 set autoread       " when a file is changed by a program other than vim while a buffer is open, automatically reload it
-
 set nostartofline  " makes it so G, gg, <C-D>, etc. don't move cursor to start of the line
-
 set modeline       " Allow for modelines
 set modelines=1    " Only check 1 modeline
 
-set sessionoptions-=options
+set sessionoptions-=options " don't save options in sessions, it gets wonky
 
 if exists('&macmeta')
-    set macmeta
+  set macmeta
 endif
-" }}}
-" }}}
 " {{{1 Useful Mappings
 " Make j and k work better with wrapped lines
-map j gj
-map k gk
+noremap j gj
+noremap k gk
 
 noremap J 10j
 noremap K 10k
 
-noremap <Leader>J Jx
-noremap <Leader><C-J> J
-
-" Set <Space> to enter command
-nnoremap <Space> :
+nnoremap <Leader><C-J> J
 
 " Sets \ to remove highlighting when in normal mode
 nnoremap \ :noh<CR>
 
 " Maps Y to y$ to work like D and C
-map Y y$
+nnoremap Y y$
 
 " Keep search results in center of screen
 nnoremap <silent>n nzz
@@ -356,24 +237,14 @@ nnoremap # #N
 nnoremap Q @q
 
 " Quick switch between alternate buffers
-noremap <Leader><Leader><Space> <C-^>
+nnoremap <Leader><Leader><Space> <C-^>
+nnoremap <silent> <Leader>bd <C-^>:bd #<CR>
 
-" Easy switch between panes
-nnoremap <M-H> <C-W>h
-nnoremap <M-J> <C-W>j
-nnoremap <M-K> <C-W>k
-nnoremap <M-L> <C-W>l
-" Easy resizing of panes
-nnoremap <M-+> <C-W>+
-nnoremap <M--> <C-W>-
-nnoremap <M->> <C-W>>
-nnoremap <M-<> <C-W><
-"
-" Maps \cp to yank the current file path to the unnamed register
-nmap <Leader>cp :let @" = &filetype . ' ' . expand("%:p") . "\n"<CR>
+" Maps ,cp to yank the current file path to the unnamed register
+nnoremap <Leader>cp :let @" = &filetype . ' ' . expand("%:p") . "\n"<CR>
 
 " Allows looking up the syntax under the cursor
-nmap <F10> :echo "hi<" .synIDattr(synID(line('.'),col('.'),1),'name'). '> trans<'
+nnoremap <F10> :echo "hi<" .synIDattr(synID(line('.'),col('.'),1),'name'). '> trans<'
             \ .synIDattr(synID(line('.'),col('.'),0),'name'). '> lo<'
             \ .synIDattr(synIDtrans(synID(line('.'),col('.'),1)),'name'). '>'<CR>
 
@@ -382,44 +253,50 @@ inoremap <C-A> <C-O>^
 inoremap <C-E> <C-O>$
 cnoremap <C-A> <Home>
 
+" {{{1 Functions
 " Insert debugger/ipdb statement
 nnoremap <Leader><C-I> :call InsertDebugTrace()<CR>
-" }}}
-" {{{1 Functions
-function! InsertDebugTrace() "{{{
-    if (&ft == 'python')
-        normal! Oimport ipdb; ipdb.set_trace()
-    elseif (&ft == 'javascript')
-        normal! Odebugger;
-    endif
-    :w!
-endfunction "}}}
-" }}}
-" Auto Commands {{{1
-" Automatically set html files to be htmldjango filetype
-augroup FileTypeConfs
-    autocmd!
-    autocmd BufRead,BufNewFile *.html set filetype=htmldjango
-    autocmd BufRead,BuFNewFile *.tpl set filetype=htmldjango
-    autocmd BufRead,BufNewFile *.md set filetype=markdown
-    autocmd BufRead *nginx_ycharts* set filetype=nginx
-    autocmd BufRead *ycharts*cron.txt set filetype=crontab
-    autocmd BufRead *.sh :call SetFileTypeSH("bash")
-    autocmd QuickFixCmdPost *grep* cwindow
-augroup END
+function! InsertDebugTrace()
+  if (&ft == 'python')
+    normal! Oimport ipdb; ipdb.set_trace()
+  elseif (&ft == 'javascript')
+    normal! Odebugger;
+  endif
+endfunction
 
-" Set cursorline and cursorcolumn (crosshairs) in active window only
-augroup CursorLine
-    autocmd!
-    autocmd VimEnter,WinEnter,BufWinEnter * setlocal cursorline
-    autocmd WinLeave * setlocal nocursorline
+function! ScratchBuf(...)
+  if a:0 == 0
+    let ft = &filetype
+  else
+    let ft = a:1
+  endif
+
+  new
+  setlocal buftype=nofile
+  setlocal bufhidden=hide
+  setlocal noswapfile
+  setlocal buflisted
+  exec 'setlocal filetype='.ft
+endfunction
+command! -nargs=? -complete=filetype Scratch call ScratchBuf(<f-args>)
+
+" Auto Commands {{{1
+augroup FileTypeConfs
+  autocmd!
+  autocmd BufRead,BufNewFile *.html set filetype=htmldjango
+  autocmd BufRead,BuFNewFile *.tpl set filetype=htmldjango
+  autocmd BufRead,BufNewFile *.md set filetype=markdown
+  autocmd BufRead *nginx_ycharts* set filetype=nginx
+  autocmd BufRead *ycharts*cron.txt set filetype=crontab
+  autocmd BufRead *.sh :call SetFileTypeSH("bash")
+  autocmd QuickFixCmdPost *grep* cwindow
 augroup END
 "}}}
 
 " try to source local vimrc
 " for stuff like powerline
 if filereadable(glob("~/.vimrc.local"))
-    source ~/.vimrc.local
+  source ~/.vimrc.local
 endif
 
 " vim:foldlevel=0
