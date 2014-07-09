@@ -6,7 +6,7 @@
 [core]
     ; Don't trust file modes
     filemode = false
-    editor = "/usr/local/bin/vim -f"
+    editor = "/usr/local/bin/vim -gf"
     excludesfile = ~/.gitignore
 
 [color]
@@ -16,9 +16,9 @@
     lineNumber = true
 
 [alias]
-    lg = log --format=format:'%C(yellow)%h - %C(red)%ar%C(reset) %C(green)<%an> %C(reset)%s%C(bold yellow)%d'
+    lg = !git --no-pager log -n 25 --format=format:'%C(yellow)%h - %C(red)%ar%C(reset) %C(green)<%an> %C(reset)%s%C(bold yellow)%d%C(reset)'
     st = status -sb
-	ctags = !.git/hooks/ctags
+    ctags = !.git/hooks/ctags
 
 [web]
     browser = open
