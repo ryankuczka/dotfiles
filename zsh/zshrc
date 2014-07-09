@@ -1,21 +1,13 @@
+export DOTFILES_DIR=/repos/dotfiles
 #############
 # ZSH OPTIONS
 #############
 setopt HIST_IGNORE_ALL_DUPS
 
-#################
-# TERMINAL COLORS
-#################
-[[ -f $HOME/.ryan-base16-colors.sh ]] && source $HOME/.ryan-base16-colors.sh
-
 ###################
 # PATH MANIPULATION
 ###################
 export PATH=/usr/local/bin:$PATH
-# MySQL PATH variables
-export PATH=$PATH:/usr/local/mysql/bin
-# MySQL Libraries
-export DYLD_LIBRARY_PATH=/usr/local/mysql/lib
 export PATH=$PATH:/Users/ryan/bin
 # NPM binaries
 export PATH=$PATH:/usr/local/share/npm/bin
@@ -45,7 +37,6 @@ antigen bundle autoenv
 antigen bundle brew
 antigen bundle celery
 antigen bundle colored-man
-antigen bundle django
 antigen bundle fabric
 antigen bundle git
 antigen bundle jsontools
@@ -60,16 +51,38 @@ antigen bundle web-search
 antigen bundle zsh_reload
 # Command line syntax highlighting!
 antigen bundle zsh-users/zsh-syntax-highlighting
+# History sub-string search
+antigen bundle zsh-users/zsh-history-substring-search
 # Auto environments!
 antigen bundle kennethreitz/autoenv
 
+# My custom scripts
+antigen bundle $DOTFILES_DIR/zsh/plugins/django
+antigen bundle $DOTFILES_DIR/zsh/custom
+
 antigen apply
 
-##################
-# FANCY PROMPTLINE
-##################
+# Bind UP/DOWN to search substrings in history
+zmodload zsh/terminfo
+bindkey "$terminfo[kcuu1]" history-substring-search-up
+bindkey "$terminfo[kcud1]" history-substring-search-down
+# Change highlighting of history substring search
+export HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND="bg=yellow,fg=black,bold"
+
+zstyle ':completion:*' menu select=2
+
+# Store completion cache files in $DOTFILES_DIR/zsh/completion_cache
+export ZSH_PIP_CACHE_FILE=$DOTFILES_DIR/zsh/completion_cache/pip
+export ZSH_DJANGO_CACHE_FILE=$DOTFILES_DIR/zsh/completion_cache/django
+
 ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
-[[ -f $HOME/.prompt.zsh ]] && source $HOME/.prompt.zsh
+
+# Suspend and restart vim
+foreground-vim() {
+    fg %vim
+}
+zle -N foreground-vim
+bindkey "^Z" foreground-vim
 
 #####################
 # BASIC ENV VARIABLES
@@ -77,7 +90,7 @@ ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
 # Don't edit default merge commit messages
 export GIT_MERGE_AUTOEDIT=no
 # Set editor to gvim
-export EDITOR="/usr/local/bin/vim -f"
+export EDITOR="/usr/local/bin/vim -gf"
 export CLICOLOR=1
 
 # Aliases
@@ -93,16 +106,16 @@ tn() {
     /Applications/terminal-notifier.app/Contents/MacOS/terminal-notifier -message "$message" -subtitle "$prog" > /dev/null
 }
 alias nw="/Applications/node-webkit.app/Contents/MacOS/node-webkit"
-alias tree="tree -I '*.pyc|*.un~|*.sw[op]|*node_modules*|%*|.DS_Store' -Ca"
-alias sp="python manage.py shell_plus --ipython"
-alias rs="python manage.py runserver 0.0.0.0:8000"
+alias tree="tree -I '*.pyc|*.un~|*.sw[op]|*node_modules*|%*|.DS_Store|.git' -Ca"
 alias pman="man-preview"
 
 alias git="hub"
+alias gcd="git checkout develop"
 alias gss="git status -sb"
 alias glg="git --no-pager log -n 25 --format=format:'%C(reset)%C(yellow)%h - %C(red)%ar%C(reset) %C(green)<%an> %C(reset)%s%C(bold yellow)%d'"
 alias glgg="git log --format=format:'%C(reset)%C(yellow)%h - %C(red)%ar%C(reset) %C(green)<%an> %C(reset)%s%C(bold yellow)%d'"
 alias gstl="git --no-pager stash list"
+alias gpr="git pull-request -o -b ycharts:develop -h ryankuczka:$(current_branch)"
 
 # Ruby binaries
 PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting

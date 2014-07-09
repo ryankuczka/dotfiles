@@ -1,0 +1,199 @@
+#compdef manage.py
+#autoload
+
+typeset -ga nul_args
+nul_args=(
+    '--settings=-[the Python path to a settings module.]:file:_files'
+    '--pythonpath=-[a directory to add to the Python path.]::directory:_directories'
+    '--traceback[print traceback on exception.]'
+    "--version[show program's version number and exit.]"
+    {-h,--help}'[show this help message and exit.]'
+)
+
+_managepy-adminindex(){
+    _arguments -s : \
+        $nul_args \
+        '*::directory:_directories' && ret=0
+}
+
+_managepy-createcachetable(){
+    _arguments -s : \
+        $nul_args && ret=0
+}
+
+_managepy-collectstatic(){
+    _arguments -s : \
+        '--link=-[Create a symbolic link to each file instead of copying.]:' \
+        '--noinput=-[Do NOT prompt the user for input of any kind.]:' \
+        '--no-post-process=-[Do NOT post process collected files.]:' \
+        '--ignore=-[Ignore files or directories matching this glob-style pattern. Use multiple times to ignore more.]:' \
+        '--dry-run=-[Do everything except modify the filesystem.]:' \
+        '--clear=-[Clear the existing files using the storage before trying to copy or link the original file.]:' \
+        '--link=-[Create a symbolic link to each file instead of copying.]:' \
+        '--no-default-ignore=-[Do not ignore the common private glob-style patterns "CVS", ".*" and "*~".]:' \
+        $nul_args && ret=0
+}
+
+_managepy-dbshell(){
+    _arguments -s : \
+        $nul_args && ret=0
+}
+
+_managepy-diffsettings(){
+    _arguments -s : \
+        $nul_args && ret=0
+}
+
+_managepy-dumpdata(){
+    _arguments -s : \
+        '--format=-[specifies the output serialization format for fixtures.]:format:(json yaml xml)' \
+        '--indent=-[specifies the indent level to use when pretty-printing output.]:' \
+        $nul_args \
+        '*::appname:_applist' && ret=0
+}
+
+_managepy-flush(){
+    _arguments -s : \
+        '--verbosity=-[verbosity level; 0=minimal output, 1=normal output, 2=all output.]:Verbosity:((0\:minimal 1\:normal 2\:all))' \
+        '--noinput[tells Django to NOT prompt the user for input of any kind.]' \
+        $nul_args && ret=0
+}
+
+_managepy-help(){
+    _arguments -s : \
+        '--noinput[tells Django to NOT prompt the user for input of any kind.]' \
+        $nul_args \
+        '*:command:_managepy-commands' && ret=0
+}
+
+_managepy-inspectdb(){
+    _arguments -s : \
+        $nul_args && ret=0
+}
+
+_managepy-loaddata(){
+    _arguments -s : \
+        '--verbosity=-[verbosity level; 0=minimal output, 1=normal output, 2=all output.]:Verbosity:((0\:minimal 1\:normal 2\:all))' \
+        '*::file:_files' \
+        $nul_args && ret=0
+}
+
+_managepy-reset(){
+    _arguments -s : \
+        '--noinput[tells Django to NOT prompt the user for input of any kind.]' \
+        '*::appname:_applist' \
+        $nul_args && ret=0
+}
+
+_managepy-runfcgi(){
+    local state
+
+    local fcgi_opts
+    fcgi_opts=(
+        'protocol[fcgi, scgi, ajp, ... (default fcgi)]:protocol:(fcgi scgi ajp)'
+        'host[hostname to listen on..]:'
+        'port[port to listen on.]:'
+        'socket[UNIX socket to listen on.]::file:_files'
+        'method[prefork or threaded (default prefork)]:method:(prefork threaded)'
+        'maxrequests[number of requests a child handles before it is killed and a new child is forked (0 = no limit).]:'
+        'maxspare[max number of spare processes / threads.]:'
+        'minspare[min number of spare processes / threads.]:'
+        'maxchildren[hard limit number of processes / threads.]:'
+        'daemonize[whether to detach from terminal.]:boolean:(False True)'
+        'pidfile[write the spawned process-id to this file.]:file:_files'
+        'workdir[change to this directory when daemonizing.]:directory:_files'
+        'outlog[write stdout to this file.]:file:_files'
+        'errlog[write stderr to this file.]:file:_files'
+    )
+
+    _arguments -s : \
+        $nul_args \
+        '*: :_values "FCGI Setting" $fcgi_opts' && ret=0
+}
+
+_managepy-runserver(){
+    _arguments -s : \
+        '--noreload[tells Django to NOT use the auto-reloader.]' \
+        '--adminmedia[specifies the directory from which to serve admin media.]:directory:_files' \
+        $nul_args && ret=0
+}
+
+_managepy-shell(){
+    _arguments -s : \
+        '--plain[tells Django to use plain Python, not IPython.]' \
+        $nul_args && ret=0
+}
+
+_managepy-sql(){}
+_managepy-sqlall(){}
+_managepy-sqlclear(){}
+_managepy-sqlcustom(){}
+_managepy-sqlflush(){}
+_managepy-sqlindexes(){}
+_managepy-sqlinitialdata(){}
+_managepy-sqlreset(){}
+_managepy-sqlsequencereset(){}
+_managepy-startapp(){}
+
+_managepy-syncdb() {
+    _arguments -s : \
+        '--verbosity=-[verbosity level; 0=minimal output, 1=normal output, 2=all output.]:Verbosity:((0\:minimal 1\:normal 2\:all))' \
+        '--noinput[tells Django to NOT prompt the user for input of any kind.]' \
+        $nul_args && ret=0
+}
+
+_managepy-test() {
+    _arguments -s : \
+        '--verbosity=-[verbosity level; 0=minimal output, 1=normal output, 2=all output.]:Verbosity:((0\:minimal 1\:normal 2\:all))' \
+        '--noinput[tells Django to NOT prompt the user for input of any kind.]' \
+        '*::appname:_applist' \
+        $nul_args && ret=0
+}
+
+_managepy-testserver() {
+    _arguments -s : \
+        '--verbosity=-[verbosity level; 0=minimal output, 1=normal output, 2=all output.]:Verbosity:((0\:minimal 1\:normal 2\:all))' \
+        '--addrport=-[port number or ipaddr:port to run the server on.]' \
+        '*::fixture:_files' \
+        $nul_args && ret=0
+}
+
+_managepy-validate() {
+    _arguments -s : \
+        $nul_args && ret=0
+}
+
+_managepy-commands() {
+    if (( ! $+django_command_list )); then
+        zsh-django-cache-commands
+        local -a django_command_list
+        cat $ZSH_DJANGO_CACHE_FILE | while read -A line; do django_command_list=($line $django_command_list); done
+    fi
+    _describe -t commands 'manage.py command' django_command_list && ret=0
+}
+
+_applist() {
+    local line
+    local -a apps
+    _call_program help-command "python -c \"import re, django.conf, sys;[sys.stdout.write(str(i) + '\n') for i in django.conf.settings.INSTALLED_APPS]\"" \
+        | while read -A line; do apps=($line $apps); done
+    _values 'Application' $apps && ret=0
+}
+
+_managepy() {
+    local curcontext=$curcontext ret=1
+
+    if ((CURRENT == 2)); then
+        _managepy-commands
+    else
+        shift words
+        (( CURRENT -- ))
+        curcontext="${curcontext%:*:*}:managepy-$words[1]:"
+        _call_function ret _managepy-$words[1]
+    fi
+}
+
+compdef _managepy manage.py
+compdef _managepy django
+compdef _managepy django-admin.py
+compdef _managepy django-manage
