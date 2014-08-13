@@ -1,16 +1,29 @@
 export DOTFILES_DIR=/repos/dotfiles
-#############
-# ZSH OPTIONS
-#############
-setopt HIST_IGNORE_ALL_DUPS
+##################
+# MISC ZSH OPTIONS
+##################
+# Smart URLs
+autoload -U url-quote-magic
+zle -N self-insert url-quote-magic
+# Opts
+setopt long_list_jobs  # Jobs
+setopt auto_cd
+setopt multios
+setopt cdablevars
+# Key Timeout
+export PROMPT_EOL_MARK=""
+export KEYTIMEOUT=1
+zstyle ':completion:*' menu select=2
+
+# Add a function path
+fpath=($DOTFILES_DIR/zsh/functions $DOTFILES_DIR/zsh/completions $fpath)
 
 ###################
 # PATH MANIPULATION
 ###################
-export PATH=/usr/local/bin:$PATH
-export PATH=$PATH:/Users/ryan/bin
-# NPM binaries
-export PATH=$PATH:/usr/local/share/npm/bin
+# Force unique entries in PATH
+typeset -Ug path
+path=(/usr/local/bin $path $HOME/bin /usr/local/share/npm/bin /opt/chef/embedded/bin /usr/local/heroku/bin)
 
 ###################
 # PYTHON VIRTUALENV
@@ -20,69 +33,35 @@ export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python
 export VIRTUAL_ENV_DISABLE_PROMPT=1
 source /usr/local/bin/virtualenvwrapper.sh
 
-#######################
-#
-# Oh-My-Zsh via Antigen
-#
-#######################
-export ENABLE_CORRECTION="true"
-export PROMPT_EOL_MARK=""
-source $HOME/.antigen/antigen.zsh
+#############
+# ZSH PLUGINS
+#############
+# Set up compinit
+autoload -U compinit
+compinit -d $DOTFILES_DIR/zsh/cache/zcomp-${HOST/.*/}
 
-# Use Oh-My-Zsh's /lib/
-antigen use oh-my-zsh
+for plugin in $DOTFILES_DIR/zsh/plugins/*.zsh; do
+    source $plugin
+done
 
-# Oh-My-Zsh plugins
-antigen bundle autoenv
-antigen bundle brew
-antigen bundle celery
-antigen bundle colored-man
-antigen bundle fabric
-antigen bundle git
-antigen bundle jsontools
-antigen bundle node
-antigen bundle npm
-antigen bundle osx
-antigen bundle pip
-antigen bundle python
-antigen bundle redis-cli
-antigen bundle urltools
-antigen bundle web-search
-antigen bundle zsh_reload
-# Command line syntax highlighting!
-antigen bundle zsh-users/zsh-syntax-highlighting
-# History sub-string search
-antigen bundle zsh-users/zsh-history-substring-search
-# Auto environments!
-antigen bundle kennethreitz/autoenv
+# Syntax Highlighting
+source $DOTFILES_DIR/zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
+ZSH_HIGHLIGHT_STYLES[single-hyphen-option]="fg=blue,bold"
+ZSH_HIGHLIGHT_STYLES[double-hyphen-option]="fg=blue,bold"
+ZSH_HIGHLIGHT_STYLES[commandseparator]="fg=yellow"
 
-# My custom scripts
-antigen bundle $DOTFILES_DIR/zsh/plugins/django
-antigen bundle $DOTFILES_DIR/zsh/custom
-
-antigen apply
-
+# History Substring Search
+source $DOTFILES_DIR/zsh/zsh-history-substring-search/zsh-history-substring-search.zsh
 # Bind UP/DOWN to search substrings in history
 zmodload zsh/terminfo
 bindkey "$terminfo[kcuu1]" history-substring-search-up
 bindkey "$terminfo[kcud1]" history-substring-search-down
 # Change highlighting of history substring search
-export HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND="bg=yellow,fg=black,bold"
+HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND="bg=yellow,fg=black,bold"
 
-zstyle ':completion:*' menu select=2
-
-# Store completion cache files in $DOTFILES_DIR/zsh/completion_cache
-export ZSH_PIP_CACHE_FILE=$DOTFILES_DIR/zsh/completion_cache/pip
-export ZSH_DJANGO_CACHE_FILE=$DOTFILES_DIR/zsh/completion_cache/django
-
-ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
-
-# Suspend and restart vim
-foreground-vim() {
-    fg %vim
-}
-zle -N foreground-vim
-bindkey "^Z" foreground-vim
+# Autoenv
+source $DOTFILES_DIR/zsh/autoenv/activate.sh
 
 #####################
 # BASIC ENV VARIABLES
@@ -90,40 +69,12 @@ bindkey "^Z" foreground-vim
 # Don't edit default merge commit messages
 export GIT_MERGE_AUTOEDIT=no
 # Set editor to gvim
-export EDITOR="/usr/local/bin/vim -gf"
+export EDITOR="/usr/local/bin/vim -f"
+export PAGER="less"
+export LESS="-RXE"
 export CLICOLOR=1
+export LC_CTYPE=$LANG
 
-# Aliases
-tn() {
-    local message="Process has finished"
-    if [[ $1 == "-message" ]]; then
-        message=$2
-        shift; shift;
-    fi
-    local prog=$1
-    shift
-    $prog $@
-    /Applications/terminal-notifier.app/Contents/MacOS/terminal-notifier -message "$message" -subtitle "$prog" > /dev/null
-}
-alias nw="/Applications/node-webkit.app/Contents/MacOS/node-webkit"
-alias tree="tree -I '*.pyc|*.un~|*.sw[op]|*node_modules*|%*|.DS_Store|.git' -Ca"
-alias pman="man-preview"
-
-alias git="hub"
-alias gcd="git checkout develop"
-alias gss="git status -sb"
-alias glg="git --no-pager log -n 25 --format=format:'%C(reset)%C(yellow)%h - %C(red)%ar%C(reset) %C(green)<%an> %C(reset)%s%C(bold yellow)%d'"
-alias glgg="git log --format=format:'%C(reset)%C(yellow)%h - %C(red)%ar%C(reset) %C(green)<%an> %C(reset)%s%C(bold yellow)%d'"
-alias gstl="git --no-pager stash list"
-alias gpr="git pull-request -o -b ycharts:develop -h ryankuczka:$(current_branch)"
-
-# Ruby binaries
-PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
-export PATH=$PATH:/usr/local/opt/ruby/bin
-
-rvm use 1.9.3 > /dev/null
-
-###########
-# Heroku
-###########
-export PATH="$PATH:/usr/local/heroku/bin"
+# Allow use of ^S and ^Q in vim
+stty -ixon -ixoff
+stty stop undef

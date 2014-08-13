@@ -54,14 +54,14 @@ left_prompt () {
     local sep_alt=""
 
     if [[ -n $VIRTUAL_ENV ]]; then
-        print -n "$BG[002]$FG[000] ${VIRTUAL_ENV:t} $FG[002]$BG[008]$sep "
+        print -n "$BG[001]$FG[000]$FX[bold] ${VIRTUAL_ENV:t} $FX[reset]$FG[001]$BG[018]$sep "
     else
-        print -n "$BG[008] "
+        print -n "$BG[018] "
     fi
 
-    print -n "$FG[007]$(print %n) $sep_alt $(print %m) $FG[008]$BG[019]$sep "
+    print -n "$FG[020]$(print %n) $sep_alt $(print %m) $FG[018]$BG[019]$sep "
 
-    print -n "$FG[007]$(cwd_prompt)"
+    print -n "$FG[020]$(cwd_prompt)"
 
     print -n "$FX[reset]$FG[019]$sep$FX[reset] "
 }
@@ -71,7 +71,7 @@ right_prompt () {
     local sep_alt=""
 
     if [[ $last_exit_code -gt 0 ]]; then
-        print -n "$FG[001]$sep$FG[007]$BG[001] $last_exit_code "
+        print -n "$FG[001]$sep$FG[000]$BG[001] $last_exit_code "
     fi
 
     local branch="$( { git symbolic-ref --quiet HEAD || git rev-parse --short HEAD; } 2>/dev/null )"
