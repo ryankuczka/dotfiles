@@ -1,9 +1,6 @@
-" Jedi.vim
-setlocal omnifunc=jedi#completions
-setlocal completeopt=menuone,longest
-call jedi#configure_call_signatures()
-
-" Folding
+" Folding: {{{
+" ========
+" expr folding doesn't play nice with neocomplete
 setlocal foldmethod=expr
 setlocal foldexpr=PythonFoldExpr(v:lnum)
 setlocal foldtext=PythonFoldText()
@@ -21,10 +18,6 @@ function! PythonFoldExpr(lnum)
     else
       return '='
     endif
-  " elseif getline(a:lnum) =~ '\[[^\]]*$\|{[^}]*$'
-  "   return IndentLevel(a:lnum) + 1
-  " elseif getline(a:lnum) =~ '^[^\[]*\]\|^[^{]*}'
-  "   return '<' . (IndentLevel(nextnonblank(a:lnum)) + 1)
   elseif indent(a:lnum) == 0
     return 0
   endif

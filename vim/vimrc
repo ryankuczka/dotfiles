@@ -1,26 +1,30 @@
 " Ryan Kuczka
 
-" Set up required Vundle stuff
+" Basic Setup:
+" ============
 set nocompatible
 filetype off
 
+" Vundle Setup: {{{1
+" =============
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
-" {{{1 Load Plug-Ins
-Plugin 'gmarik/Vundle.vim'
 
+" Load Plugins:
+" =============
+Plugin 'gmarik/Vundle.vim'
 Plugin 'tpope/vim-fugitive'
 Plugin 'tpope/vim-surround'
 Plugin 'tpope/vim-abolish'
 Plugin 'tpope/vim-unimpaired'
 Plugin 'tpope/vim-repeat'
 Plugin 'tpope/vim-commentary'
+Plugin 'tpope/vim-vinegar'
 Plugin 'Rename2'
 Plugin 'takac/vim-commandcaps'
 Plugin 'lilydjwg/colorizer'
 Plugin 'bling/vim-airline'
-Plugin 'edkolev/promptline.vim'
-" Plugin 'Valloric/YouCompleteMe'
+Plugin 'Valloric/YouCompleteMe'
 Plugin 'sjl/gundo.vim'
 Plugin 'Yggdroot/indentLine'
 Plugin 'suan/vim-instant-markdown'
@@ -28,83 +32,64 @@ Plugin 'rking/ag.vim'
 Plugin 'scrooloose/syntastic'
 Plugin 'kien/ctrlp.vim'
 Plugin 'JazzCore/ctrlp-cmatcher'
-Plugin 'The-NERD-tree'
-Plugin 'ShowTrailingWhitespace'
-Plugin 'DeleteTrailingWhitespace'
 Plugin 'Lokaltog/vim-easymotion'
-Plugin 'godlygeek/tabular'
 Plugin 'airblade/vim-gitgutter'
 Plugin 'kshenoy/vim-signature'
-Plugin 'SirVer/ultisnips'
-Plugin 'kien/rainbow_parentheses.vim'
-Plugin 'Shougo/neocomplete.vim'
-Plugin 'davidhalter/jedi-vim'
-" {{{2 Color schemes
+Plugin 'christoomey/vim-tmux-navigator'
+" Color Schemes: {{{2
 Plugin 'jonathanfilip/vim-lucius'
 Plugin 'altercation/vim-colors-solarized'
 Plugin 'nanotech/jellybeans.vim'
 Plugin 'w0ng/vim-hybrid'
-" {{{2 Syntax files
+" Syntax Files: {{{2
 Plugin 'hdima/python-syntax'
 Plugin 'pangloss/vim-javascript'
 Plugin 'evanmiller/nginx-vim-syntax'
 Plugin 'groenewege/vim-less'
-" }}}1
-call vundle#end()
-
+" }}}2
+call vundle#end() " }}}1
 filetype plugin indent on
 
-" {{{1 Configure Plug-Ins
-
-" map leader up here so it takes effect
 let mapleader = ','
 
-" {{{2 TPope Plug-Ins
+" Configure Plugins: {{{1
+" ==================
+" Fugitive: {{{2
 nnoremap <Leader>gs :Gstatus<CR>
 " open the current file on github
 nnoremap <Leader>gb :<C-R>=line('.')<CR>Gbrowse@ryan<CR>
 vnoremap <Leader>gb :Gbrowse@ryan<CR>
-" {{{2 Neocomplete
-let g:neocomplete#enable_at_startup = 1
-let g:neocomplete#enable_smart_case = 1
-if !exists('g:neocomplete#force_omni_input_patterns')
-  let g:neocomplete#force_omni_input_patterns = {}
-endif
-let g:neocomplete#force_omni_input_patterns.python =
-      \ '\%([^. \t]\.\|^\s*@\|^\s*from\s.\+import \|^\s*from \|^\s*import \)\w*'
-" Testing out recommended key mappings
-" <CR>: Close popup and save indent
-inoremap <silent> <CR> <C-R>=<SID>my_cr_function()<CR>
-function! s:my_cr_function()
-  return pumvisible() ? neocomplete#close_popup() : "\<CR>"
-endfunction
-" <Tab> completion
-inoremap <silent> <Tab> <C-R>=<SID>my_tab_function()<CR>
-function! s:my_tab_function()
-  return pumvisible() ? "\<C-N>" : "\<Tab>"
-endfunction
-" {{{2 Jedi
-let g:jedi#auto_vim_configuration = 0
-let g:jedi#auto_initialization = 0
-let g:jedi#popup_select_first = 0
-let g:jedi#completions_enabled = 0
-" {{{2 Airline
+
+" YouCompleteMe: {{{2
+let g:ycm_collect_identifiers_from_tags_files = 1
+
+" Airline: {{{2
 let g:airline_powerline_fonts=1
-let g:airline_theme='jellybeans'
+let g:airline_theme='ryan'
 let g:airline#extensions#hunks#non_zero_only = 1
-" UltiSnips {{{2
-let g:UltiSnipsEditSplit = 'vertical'
-let g:UltiSnipsExpandTrigger = '<C-E>'
-" Gundo {{{2
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#show_buffers = 0
+let g:airline#extensions#tabline#fnamemod = ':t'
+
+" Gundo: {{{2
 nnoremap <Leader>u :GundoToggle<CR>
 let g:gundo_preview_bottom=1
-" {{{2 IndentLine
+
+" IndentLine: {{{2
 let g:indentLine_char = '┊'
-" {{{2 Instant Markdown
+let g:indentLine_setColors = 0
+
+" Instant Markdown: {{{2
 let g:instant_markdown_slow = 1
-" {{{2 Ag
+
+" Ag: {{{2
+let g:ag_apply_lmappings = 0
+let g:ag_apply_qmappings = 0
+let g:ag_qhandler = "below copen"
+let g:ag_lhandler = "below lopen"
 nnoremap <Leader><Leader>f :Ag<Space>
-" {{{2 Syntastic
+
+" Syntastic: {{{2
 nnoremap <C-S> :SyntasticCheck<CR>
 let g:syntastic_mode_map = {'mode': 'passive'}
 let g:syntastic_auto_loc_list=1
@@ -113,7 +98,8 @@ let g:syntastic_python_checkers=["flake8"]
 let g:syntastic_python_flake8_args='--ignore=E501,E128,E261,E262'
 let g:syntastic_javascript_checkers=["jshint"]
 let g:syntastic_javascript_jshint_args='--config /sites/ycharts/confs/developers/jshint_conf.json'
-" {{{2 CtrlP
+
+" CtrlP: {{{2
 let g:ctrlp_working_path_mode='ra'
 let g:ctrlp_max_files=0
 let g:ctrlp_user_command=['.git', 'cd %s && git ls-files . -co --exclude-standard', 'ag %s -l --nocolor -g ""']
@@ -121,75 +107,93 @@ let g:ctrlp_match_func={'match' : 'matcher#cmatch'}
 let g:ctrlp_extensions=['buffertag']
 let g:ctrlp_mruf_relative=1
 nnoremap <Leader><C-P> :CtrlPBufTag<CR>
-" {{{2 NERDTree
-let NERDTreeIgnore = ['\.pyc$']
-map <Leader><C-N> :NERDTreeToggle<CR>
-" {{{2 TrailingWhiteSpace
-nnoremap <Leader>d$ :<C-U>%DeleteTrailingWhitespace<CR>
-let g:DeleteTrailingWhitespace = 1
-" {{{2 Easymotion
-let g:EasyMotion_leader_key = '<Leader>'
-" {{{2 GitGutter
+
+" EasyMotion: {{{2
+let g:EasyMotion_do_mapping = 0
+map <Leader>f <Plug>(easymotion-f)
+map <Leader>F <Plug>(easymotion-F)
+map <Leader>n <Plug>(easymotion-vim-n)
+map <Leader>N <Plug>(easymotion-vim-N)
+map <Leader>s <Plug>(easymotion-s)
+map <Leader>; <Plug>(easymotion-next)
+map <Leader>. <Plug>(easymotion-repeat)
+
+" GitGutter: {{{2
 let g:gitgutter_realtime = 0
 let g:gitgutter_eager = 0
-" {{{2 Signature
+
+" Signature: {{{2
 let g:SignatureMarkTextHL = 'SignColumn'
-" {{{2 Python Syntax
+
+" Python Syntax: {{{2
 let g:python_version_2 = 1
 let g:python_highlight_all = 1
 let g:python_highlight_space_errors = 0
-" {{{1 Standard Options
-" {{{2 Syntax, View, and Window
+
+" Javascript Syntax: {{{2
+let g:javascript_ignore_javaScriptdoc = 1
+
+" Standard Options: {{{1
+" =================
+" Syntax Highlighting: {{{2
 syntax on
 
 set t_Co=256       " sets the number of colors to 256
-let g:base16colorspace = 256
+let g:base16colorspace=256
 colorscheme ryan-base16
 
+" Window Options: {{{2
 set number
-set incsearch      " highlights as you search
-set hlsearch       " highlights search results
 set nowrap         " disables word wrapping
 set scrolloff=3    " ensures that at least 3 lines of context are always visible
-
 set laststatus=2
 set noshowmode
 set noruler        " shows line,col in bottom right
 set showcmd        " shows the partial command in the lower right
-set list listchars=tab:,extends:,precedes:  " turns hard tabs into this character
+" turns tabs into , shows  for text extending beyond window
+" and  for text extending left of window
+set list listchars=tab:,extends:,precedes:
+
+set timeout timeoutlen=1000 ttimeoutlen=10
 
 " Sets GUI Font and options
 if has('gui_running')
   set guifont=Sauce\ Code\ Powerline:h13
-  set guioptions=egmrt
+  set guioptions=egmrtc
+else
+  " Sets cursor to a bar in insert mode
+  if exists('$TMUX')
+    let &t_SI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=1\x7\<Esc>\\"
+    let &t_EI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=0\x7\<Esc>\\"
+  else
+    let &t_SI = "\<Esc>]50;CursorShape=1\x7"
+    let &t_EI = "\<Esc>]50;CursorShape=0\x7"
+  endif
 endif
-
-" Sets cursor to a bar in insert mode
-if &term =~ '^xterm'
-  let &t_SI = "\<Esc>[5 q"
-  let &t_EI = "\<Esc>[2 q"
-endif
-" {{{2 <Tab> and Indenting
+" Indentation: {{{2
 set tabstop=4      " sets the length of the tab to 4 spaces
 set shiftwidth=4   " sets the (auto)indent to 4 spaces
 set softtabstop=4  " sets number of spaces to insert for a <Tab>
 set smarttab       " a <Tab> will insert 'shiftwidth' spaces
 set expandtab      " a <Tab> is expanded to spaces in Insert mode
 set autoindent     " auto indents
-" {{{2 Command Line
+" Command Line: {{{2
 set wildmode=longest,list,full " specifies that pressing <Tab> will complete to longest common substring, then a list of options, then cycle through all options
 set wildmenu       " command line completion will show a menu of matches
 set wildignore=*.pyc " patterns to ignore for file name completion
-" {{{2 Folding
+" Folding: {{{2
 set foldmethod=marker " allows setting a marker to specify where a fold occurs
 set foldmarker={{{,}}} " sets the fold marker to {{{ to start and }}} to end
 set foldlevel=99
-" {{{2 Buffers, Search
+" Search: {{{2
+set incsearch      " highlights as you search
+set hlsearch       " highlights search results
 set ignorecase     " ignores case for search
 set smartcase      " overrides ignorecase if search pattern has upper case letters
 set gdefault       " defaults to the `g` flag for :s substitutions
 set hidden         " doesn't unload a buffer when it is no longer in a window
-" {{{2 Etc.
+" Etc: {{{2
+set backspace=eol,indent,start
 set completeopt=menuone " show completion menu even if only one match
 set eol            " ensures the last line in the file has an end of line
 set virtualedit=block " only allows the cursor to go where there is no character in Visual Block mode
@@ -201,49 +205,48 @@ set mouse=a
 set autoread       " when a file is changed by a program other than vim while a buffer is open, automatically reload it
 set nostartofline  " makes it so G, gg, <C-D>, etc. don't move cursor to start of the line
 set modeline       " Allow for modelines
-set modelines=1    " Only check 1 modeline
 
 set sessionoptions-=options " don't save options in sessions, it gets wonky
 
 if exists('&macmeta')
   set macmeta
 endif
-" {{{1 Useful Mappings
+" Useful Mappings: {{{1
+" ================
+" Movement: {{{2
 " Make j and k work better with wrapped lines
 noremap j gj
 noremap k gk
-
+" J/K move 10 lines at a time
 noremap J 10j
 noremap K 10k
-
+" Map old J (join lines) to <C-J>
 nnoremap <Leader><C-J> J
-
-" Sets \ to remove highlighting when in normal mode
-nnoremap \ :noh<CR>
-
-" Maps Y to y$ to work like D and C
-nnoremap Y y$
-
 " Keep search results in center of screen
 nnoremap <silent>n nzz
 nnoremap <silent>N Nzz
-
-" Makes */N not move cursor to next match
-" Use <C-O> instead of N to not move cursor at all
-nnoremap * *N
-nnoremap # #N
-
+" Makes */# not move cursor to next match
+nnoremap * *<C-O>
+nnoremap # #<C-O>
+" Shortcuts: {{{2
+" Sets \ to remove highlighting when in normal mode
+nnoremap <silent>\ :noh<CR>
+" Maps Y to y$ to work like D and C
+nnoremap Y y$
 " Make Q run the q macro instead of Ex mode
 nnoremap Q @q
-
 " Quick switch between alternate buffers
 nnoremap <Leader><Leader><Space> <C-^>
+" Quick kill buffer
 nnoremap <silent> <Leader>bd <C-^>:bd #<CR>
-
-" Maps ,cp to yank the current file path to the unnamed register
-nnoremap <Leader>cp :let @" = &filetype . ' ' . expand("%:p") . "\n"<CR>
-
+" Syntax Debugging: {{{2
 " Allows looking up the syntax under the cursor
+function! ShowSynStack()
+  for id in synstack(line("."), col("."))
+    echo synIDattr(id, "name")
+  endfor
+endfunction
+nnoremap <F9> :call ShowSynStack()<CR>
 nnoremap <F10> :echo "hi<" .synIDattr(synID(line('.'),col('.'),1),'name'). '> trans<'
             \ .synIDattr(synID(line('.'),col('.'),0),'name'). '> lo<'
             \ .synIDattr(synIDtrans(synID(line('.'),col('.'),1)),'name'). '>'<CR>
@@ -253,7 +256,22 @@ inoremap <C-A> <C-O>^
 inoremap <C-E> <C-O>$
 cnoremap <C-A> <Home>
 
-" {{{1 Functions
+" Filetype Overrides: {{{1
+" ===================
+augroup FileTypeConfs
+  autocmd!
+  autocmd BufRead,BufNewFile *nginx* set filetype=nginx
+  autocmd BufRead,BufNewFile *cron.txt set filetype=crontab
+  autocmd BufRead,BufNewFile *.html set filetype=htmldjango
+  autocmd BufRead,BufNewFile *.tpl set filetype=htmldjango
+  autocmd BufRead,BufNewFile *.md set filetype=markdown
+  autocmd BufRead,BufNewFile *.sh,zshrc,*deployment_notes.txt let b:is_bash=1 | set filetype=sh
+augroup END " }}}1
+
+" Miscellaneous Functions And Commands:
+" =====================================
+" Debug Statements: {{{1
+" =================
 " Insert debugger/ipdb statement
 nnoremap <Leader><C-I> :call InsertDebugTrace()<CR>
 function! InsertDebugTrace()
@@ -264,6 +282,8 @@ function! InsertDebugTrace()
   endif
 endfunction
 
+" Scratch Buffers: {{{1
+" ================
 function! ScratchBuf(...)
   if a:0 == 0
     let ft = &filetype
@@ -280,21 +300,48 @@ function! ScratchBuf(...)
 endfunction
 command! -nargs=? -complete=filetype Scratch call ScratchBuf(<f-args>)
 
-" Auto Commands {{{1
-augroup FileTypeConfs
+" Trailing Whitespace: {{{1
+" ====================
+hi link TrailingWhitespace Error
+match TrailingWhitespace /\s\+$/
+let s:trailingwhitespace_ignore_filetypes = ['gitcommit']
+
+function! s:match_ts(insert)
+  if &modifiable && index(s:trailingwhitespace_ignore_filetypes, &ft) == -1
+    if a:insert
+      match TrailingWhitespace '\s\+\%#\@<!$'
+    else
+      match TrailingWhitespace '\s\+$'
+    endif
+  else
+    call clearmatches()
+  endif
+endfunction
+
+function! s:block_write_ts()
+  if ! v:cmdbang && search('\s\+$', 'cnw')
+        \&& index(s:trailingwhitespace_ignore_filetypes, &ft) == -1
+    throw 'TrailingWhitespace: Aborting write due to trailing whitespace.'
+  endif
+endfunction
+
+function! DeleteTS()
+  execute '%s/\s\+$//e'
+  call histdel('search', -1)
+endfunction
+
+augroup TrailingWhitespace
   autocmd!
-  autocmd BufRead,BufNewFile *.html set filetype=htmldjango
-  autocmd BufRead,BuFNewFile *.tpl set filetype=htmldjango
-  autocmd BufRead,BufNewFile *.md set filetype=markdown
-  autocmd BufRead *nginx_ycharts* set filetype=nginx
-  autocmd BufRead *ycharts*cron.txt set filetype=crontab
-  autocmd BufRead *.sh :call SetFileTypeSH("bash")
-  autocmd QuickFixCmdPost *grep* cwindow
+  autocmd BufWinEnter,InsertLeave * call s:match_ts(0)
+  autocmd InsertEnter * call s:match_ts(1)
+  autocmd BufWinLeave * call clearmatches()
+  autocmd BufWritePre * try | call s:block_write_ts() | catch /^TrailingWhitespace:/ | echoerr substitute(v:exception, '^\CTrailingWhitespace:\s*', '', '') | endtry
 augroup END
-"}}}
+
+nnoremap <silent> <Leader>d$ :call DeleteTS()<CR>
+" }}}
 
 " try to source local vimrc
-" for stuff like powerline
 if filereadable(glob("~/.vimrc.local"))
   source ~/.vimrc.local
 endif
