@@ -1,4 +1,6 @@
-migrations
 tags
 node_modules
 .git/**
+*.pyc
+*.swp
+*.pdf

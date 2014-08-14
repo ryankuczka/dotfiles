@@ -5,3 +5,4 @@
 tags
 .env
 node_modules/*
+.agignore

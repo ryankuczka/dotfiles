@@ -6,7 +6,7 @@
 [core]
     ; Don't trust file modes
     filemode = false
-    editor = "/usr/local/bin/vim -gf"
+    editor = "/usr/local/bin/vim -f"
     excludesfile = ~/.gitignore
 
 [color]
