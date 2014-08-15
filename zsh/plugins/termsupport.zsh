@@ -28,7 +28,7 @@ function omz_termsupport_preexec {
   local CMD=${1[(wr)^(*=*|sudo|ssh|rake|-*)]:gs/%/%%}
   local LINE="${2:gs/%/%%}"
 
-  title '$CMD' '%100>...>$LINE%<<'
+  title "$CMD" "%100>...>$LINE%<<"
 }
 
 autoload -U add-zsh-hook
