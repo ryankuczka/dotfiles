@@ -3,52 +3,45 @@
 " Basic Setup:
 " ============
 set nocompatible
-filetype off
-
-" Vundle Setup: {{{1
-" =============
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
-
-" Load Plugins:
-" =============
-Plugin 'gmarik/Vundle.vim'
-Plugin 'tpope/vim-fugitive'
-Plugin 'tpope/vim-surround'
-Plugin 'tpope/vim-abolish'
-Plugin 'tpope/vim-unimpaired'
-Plugin 'tpope/vim-repeat'
-Plugin 'tpope/vim-commentary'
-Plugin 'tpope/vim-vinegar'
-Plugin 'Rename2'
-Plugin 'takac/vim-commandcaps'
-Plugin 'lilydjwg/colorizer'
-Plugin 'bling/vim-airline'
-Plugin 'Valloric/YouCompleteMe'
-Plugin 'sjl/gundo.vim'
-Plugin 'Yggdroot/indentLine'
-Plugin 'suan/vim-instant-markdown'
-Plugin 'rking/ag.vim'
-Plugin 'scrooloose/syntastic'
-Plugin 'kien/ctrlp.vim'
-Plugin 'JazzCore/ctrlp-cmatcher'
-Plugin 'Lokaltog/vim-easymotion'
-Plugin 'airblade/vim-gitgutter'
-Plugin 'kshenoy/vim-signature'
-Plugin 'christoomey/vim-tmux-navigator'
-" Color Schemes: {{{2
-Plugin 'jonathanfilip/vim-lucius'
-Plugin 'altercation/vim-colors-solarized'
-Plugin 'nanotech/jellybeans.vim'
-Plugin 'w0ng/vim-hybrid'
-" Syntax Files: {{{2
-Plugin 'hdima/python-syntax'
-Plugin 'pangloss/vim-javascript'
-Plugin 'evanmiller/nginx-vim-syntax'
-Plugin 'groenewege/vim-less'
-" }}}2
-call vundle#end() " }}}1
 filetype plugin indent on
+
+" Load Plugins: {{{1
+" =============
+call plug#begin()
+Plug 'tpope/vim-fugitive'
+Plug 'tpope/vim-surround'
+Plug 'tpope/vim-abolish'
+Plug 'tpope/vim-unimpaired'
+Plug 'tpope/vim-repeat'
+Plug 'tpope/vim-commentary'
+Plug 'tpope/vim-vinegar'
+Plug 'tpope/vim-eunuch'
+Plug 'takac/vim-commandcaps'
+" Plug 'lilydjwg/colorizer'
+Plug 'bling/vim-airline'
+Plug 'Valloric/YouCompleteMe', { 'do': './install.sh' }
+Plug 'sjl/gundo.vim', { 'on': 'GundoToggle' }
+Plug 'Yggdroot/indentLine'
+Plug 'suan/vim-instant-markdown', { 'for': 'markdown' }
+Plug 'scrooloose/syntastic'
+Plug 'ctrlpvim/ctrlp.vim'
+Plug 'JazzCore/ctrlp-cmatcher', { 'do': 'env CFLAGS=-Qunused-arguments CPPFLAGS=-Qunused-arguments ./install.sh' }
+Plug 'Lokaltog/vim-easymotion'
+Plug 'airblade/vim-gitgutter'
+" Plug 'kshenoy/vim-signature'
+Plug 'christoomey/vim-tmux-navigator'
+" Color Schemes: {{{2
+Plug 'jonathanfilip/vim-lucius'
+Plug 'altercation/vim-colors-solarized'
+Plug 'nanotech/jellybeans.vim'
+Plug 'w0ng/vim-hybrid'
+" Syntax Files: {{{2
+Plug 'hdima/python-syntax', { 'for': 'python' }
+Plug 'pangloss/vim-javascript', { 'for': 'javascript' }
+Plug 'evanmiller/nginx-vim-syntax', { 'for': 'nginx' }
+Plug 'groenewege/vim-less', { 'for': 'less' }
+" }}}2
+call plug#end() " }}}1
 
 let mapleader = ','
 
@@ -59,6 +52,9 @@ nnoremap <Leader>gs :Gstatus<CR>
 " open the current file on github
 nnoremap <Leader>gb :<C-R>=line('.')<CR>Gbrowse@ryan<CR>
 vnoremap <Leader>gb :Gbrowse@ryan<CR>
+
+" CommandCaps: {{{2
+let g:commandcaps_override = 1
 
 " YouCompleteMe: {{{2
 let g:ycm_collect_identifiers_from_tags_files = 1
@@ -82,13 +78,6 @@ let g:indentLine_setColors = 0
 " Instant Markdown: {{{2
 let g:instant_markdown_slow = 1
 
-" Ag: {{{2
-let g:ag_apply_lmappings = 0
-let g:ag_apply_qmappings = 0
-let g:ag_qhandler = "below copen"
-let g:ag_lhandler = "below lopen"
-nnoremap <Leader><Leader>f :Ag<Space>
-
 " Syntastic: {{{2
 nnoremap <C-S> :SyntasticCheck<CR>
 let g:syntastic_mode_map = {'mode': 'passive'}
@@ -100,7 +89,7 @@ let g:syntastic_javascript_checkers=["jshint"]
 let g:syntastic_javascript_jshint_args='--config /sites/ycharts/confs/developers/jshint_conf.json'
 
 " CtrlP: {{{2
-let g:ctrlp_working_path_mode='ra'
+let g:ctrlp_working_path_mode='wra'
 let g:ctrlp_max_files=0
 let g:ctrlp_user_command=['.git', 'cd %s && git ls-files . -co --exclude-standard', 'ag %s -l --nocolor -g ""']
 let g:ctrlp_match_func={'match' : 'matcher#cmatch'}
