@@ -6,10 +6,11 @@ export DOTFILES_DIR=/repos/dotfiles
 autoload -U url-quote-magic
 zle -N self-insert url-quote-magic
 # Opts
-setopt long_list_jobs  # Jobs
+setopt long_list_jobs   # Jobs
 setopt auto_cd
 setopt multios
 setopt cdablevars
+setopt nolistbeep       # Don't beep on ambiguous completions
 # Key Timeout
 export PROMPT_EOL_MARK=""
 export KEYTIMEOUT=1
