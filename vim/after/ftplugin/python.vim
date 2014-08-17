@@ -10,11 +10,20 @@ function! IndentLevel(lnum)
 endfunction
 
 function! PythonFoldExpr(lnum)
-  if getline(a:lnum) =~ '^\s*\%(@\|class\>\|def\>\)'
+  let text = getline(a:lnum)
+  let chars = split(text, '\zs')
+
+  if text =~ '^\s*\%(@\|class\>\|def\>\)'
     return IndentLevel(a:lnum) + 1
-  elseif getline(a:lnum) =~ '^\s*$'
-    if getline(a:lnum + 1) =~ '^\s*\%(@\|class\>\|def\>\)'
-      return '<' . (IndentLevel(a:lnum + 1) + 1)
+  elseif count(chars, '{') > count(chars, '}') || count(chars, '[') > count(chars, ']')
+    return 'a1'
+  elseif count(chars, '}') > count(chars, '{') || count(chars, ']') > count(chars, '[')
+    return 's1'
+  elseif text =~ '^\s*$'
+    if IndentLevel(a:lnum + 1) == 0 && getline(a:lnum + 1) !~ '^\s*$'
+      return '<1'
+    elseif IndentLevel(a:lnum + 1) == 1
+      return '<2'
     else
       return '='
     endif
@@ -35,11 +44,17 @@ function! PythonFoldText()
   endif
 
   let text = getline(v:foldstart)
-  let curline = v:foldstart
-  while getline(curline) =~ '^\s*@'
-    let text = text.': '.substitute(substitute(getline(curline + 1), '^\s*\(.\{-}\)\s*$', '\1', ''), '\%(def\|class\) ', '', 'g')
-    let curline = curline + 1
-  endwhile
+  if text =~ '^.\{-}{[^}]*$'
+    let text = text.'}'
+  elseif text =~ '^.\{-}\[[^\]]*$'
+    let text = text.']'
+  elseif text =~ '^\s*@'
+    let curline = v:foldstart
+    while getline(curline) =~ '^\s*@'
+      let text = text.': '.substitute(substitute(getline(curline + 1), '^\s*\(.\{-}\)\s*$', '\1', ''), '\%(def\|class\) ', '', 'g')
+      let curline = curline + 1
+    endwhile
+  endif
 
   let text = substitute(text, '^\s*\(.\{-}\)\s*$', '\1', '')
   return '+'.repeat('-', v:foldlevel).size.'lines: '.text
