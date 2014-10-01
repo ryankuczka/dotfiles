@@ -1,0 +1,11 @@
+#!/bin/sh
+
+###################
+# SET PROMPT COLORS
+###################
+ZSH_PROMPT_BG_A="003"
+ZSH_PROMPT_BG_B="010"
+ZSH_PROMPT_BG_C="000"
+ZSH_PROMPT_FG_A="000"
+ZSH_PROMPT_FG_B="000"
+ZSH_PROMPT_FG_C="010"

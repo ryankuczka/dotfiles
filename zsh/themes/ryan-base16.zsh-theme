@@ -1,5 +1,18 @@
 #!/bin/sh
 
+###################
+# SET PROMPT COLORS
+###################
+ZSH_PROMPT_BG_A="001"
+ZSH_PROMPT_BG_B="018"
+ZSH_PROMPT_BG_C="019"
+ZSH_PROMPT_FG_A="000"
+ZSH_PROMPT_FG_B="020"
+ZSH_PROMPT_FG_C="020"
+
+#################################################
+# ALTER TERMINAL COLORS TO KEEP 0-15 LOOKING GOOD
+#################################################
 color00="15/15/15" # Base 00 - Black
 color01="ac/41/42" # Base 08 - Red
 color02="90/a9/59" # Base 11 - Green

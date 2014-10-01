@@ -54,16 +54,16 @@ left_prompt () {
     local sep_alt=""
 
     if [[ -n $VIRTUAL_ENV ]]; then
-        print -n "$BG[001]$FG[000]$FX[bold] ${VIRTUAL_ENV:t} $FX[reset]$FG[001]$BG[018]$sep "
+        print -n "$BG[$ZSH_PROMPT_BG_A]$FG[$ZSH_PROMPT_FG_A]$FX[bold] ${VIRTUAL_ENV:t} $FX[reset]$FG[$ZSH_PROMPT_BG_A]$BG[$ZSH_PROMPT_BG_B]$sep "
     else
-        print -n "$BG[018] "
+        print -n "$BG[$ZSH_PROMPT_BG_B] "
     fi
 
-    print -n "$FG[020]$(print %n) $sep_alt $(print %m) $FG[018]$BG[019]$sep "
+    print -n "$FG[$ZSH_PROMPT_FG_B]$(print %n) $sep_alt $(print %m) $FG[$ZSH_PROMPT_BG_B]$BG[$ZSH_PROMPT_BG_C]$sep "
 
-    print -n "$FG[020]$(cwd_prompt)"
+    print -n "$FG[$ZSH_PROMPT_FG_C]$(cwd_prompt)"
 
-    print -n "$FX[reset]$FG[019]$sep$FX[reset] "
+    print -n "$FX[reset]$FG[$ZSH_PROMPT_BG_C]$sep$FX[reset] "
 }
 
 right_prompt () {
@@ -71,15 +71,15 @@ right_prompt () {
     local sep_alt=""
 
     if [[ $last_exit_code -gt 0 ]]; then
-        print -n "$FG[001]$sep$FG[000]$BG[001] $last_exit_code "
+        print -n "$FG[$ZSH_PROMPT_BG_A]$sep$FG[$ZSH_PROMPT_FG_A]$BG[$ZSH_PROMPT_BG_A] $last_exit_code "
     fi
 
     local branch="$( { git symbolic-ref --quiet HEAD || git rev-parse --short HEAD; } 2>/dev/null )"
     if [[ -n $branch ]]; then
-        print -n "$FG[019]$sep$FG[007]$BG[019]  ${branch:t} "
+        print -n "$FG[$ZSH_PROMPT_BG_B]$sep$FG[$ZSH_PROMPT_FG_B]$BG[$ZSH_PROMPT_BG_B]  ${branch:t} "
     fi
 
-    local next_prefix="$FG[008]$sep$FG[007]$BG[008]"
+    local next_prefix="$FG[$ZSH_PROMPT_BG_C]$sep$FG[$ZSH_PROMPT_FG_C]$BG[$ZSH_PROMPT_BG_C]"
 
     local ahead_behind="$(git_ahead_behind_prompt)"
     if [[ -n $ahead_behind ]] && [[ -z $gstat ]]; then
