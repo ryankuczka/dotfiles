@@ -125,6 +125,14 @@ set t_Co=256       " sets the number of colors to 256
 let g:base16colorspace=256
 colorscheme ryan-base16
 
+if colors_name == 'solarized'
+  hi SignColumn ctermbg=8
+  hi GitGutterAdd ctermbg=8 ctermfg=2
+  hi GitGutterDelete ctermbg=8 ctermfg=1
+  hi GitGutterChange ctermbg=8 ctermfg=3
+  hi GitGutterChangeDelete ctermbg=8 ctermfg=3
+endif
+
 " Window Options {{{2
 set number
 set nowrap         " disables word wrapping
