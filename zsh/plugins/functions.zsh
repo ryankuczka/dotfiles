@@ -175,6 +175,10 @@ tn() {
 # Nice ps
 psgrep() {
     local PSOUT="$(ps -o "user,pid,ppid,pcpu,pmem,start,etime,command" -e)"
-    echo $PSOUT | head -n1
-    echo $PSOUT | grep --color $@ | less -S
+    if [[ $# -eq 0 ]]; then
+        echo $PSOUT
+    else
+        echo $PSOUT | head -n1
+        echo $PSOUT | grep --color $@ | less -S
+    fi
 }
