@@ -8,6 +8,7 @@ filetype plugin indent on
 " Load Plugins: {{{1
 " =============
 call plug#begin()
+Plug '/repos/vim-pyfold'
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-abolish'
