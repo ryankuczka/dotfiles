@@ -102,6 +102,46 @@ zsh-pip-cache-packages() {
     fi
 }
 
+# Django Completion Helpers
+zsh-django-clear-cache() {
+    rm $DOTFILES_DIR/zsh/cache/django_*
+    unset djangocommandlist
+    unset djangoapplist
+}
+
+zsh-django-clean-commands() {
+    sed -n '/^    [a-z]/ s/^    //p'
+}
+
+zsh-django-cache-commands() {
+    if [[ ! -d $DOTFILES_DIR/zsh/cache ]]; then
+        mkdir -p $DOTFILES_DIR/zsh/cache
+    fi
+
+    if [[ ! -f $DOTFILES_DIR/zsh/cache/django_commands ]]; then
+        echo -n "(...caching django command index...)"
+        tmp_cache=/tmp/zsh_tmp_cache
+        python manage.py help 2>/dev/null | \
+            zsh-django-clean-commands >> $tmp_cache
+        sort $tmp_cache | uniq | tr '\n' ' ' > $DOTFILES_DIR/zsh/cache/django_commands
+        rm $tmp_cache
+    fi
+}
+
+zsh-django-cache-apps() {
+    if [[ ! -d $DOTFILES_DIR/zsh/cache ]]; then
+        mkdir -p $DOTFILES_DIR/zsh/cache
+    fi
+
+    if [[ ! -f $DOTFILES_DIR/zsh/cache/django_apps ]]; then
+        echo -n "(...caching django app index...)"
+        tmp_cache=/tmp/zsh_tmp_cache
+        python -c "import re, django.conf, sys;[sys.stdout.write(re.sub(r'.*\.([a-z_]+)$', r'\1', i) + '\n') for i in django.conf.settings.INSTALLED_APPS]" >> $tmp_cache
+        sort $tmp_cache | uniq | tr '\n' ' ' > $DOTFILES_DIR/zsh/cache/django_apps
+        rm $tmp_cache
+    fi
+}
+
 # Make man pages have color!
 man() {
     env \

@@ -7,7 +7,7 @@ _pip_all() {
   # we cache the list of packages (originally from the macports plugin)
   if (( ! $+piplist )); then
       zsh-pip-cache-packages
-      piplist=($(cat $ZSH_PIP_CACHE_FILE))
+      piplist=($(cat $DOTFILES_DIR/zsh/cache/pip))
   fi
 }
 
