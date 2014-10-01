@@ -59,7 +59,7 @@ let g:ycm_collect_identifiers_from_tags_files = 1
 
 " Airline {{{2
 let g:airline_powerline_fonts=1
-let g:airline_theme='ryan'
+let g:airline_theme='ryanbase16'
 let g:airline#extensions#hunks#non_zero_only = 1
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#show_buffers = 0
@@ -286,7 +286,7 @@ command! -nargs=? -complete=filetype Scratch call ScratchBuf(<f-args>)
 
 " Trailing Whitespace: {{{1
 " ====================
-hi link TrailingWhitespace Error
+hi TrailingWhitespace ctermbg=1 guibg=#FF0000
 match TrailingWhitespace /\s\+$/
 let s:trailingwhitespace_ignore_filetypes = ['gitcommit']
 
