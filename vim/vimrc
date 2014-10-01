@@ -46,7 +46,7 @@ let mapleader = ','
 " Configure Plugins: {{{1
 " ==================
 " Fugitive {{{2
-nnoremap <Leader>gs :Gstatus<CR>
+nnoremap <Leader>gs <C-W>o:Gstatus<CR>
 " open the current file on github
 nnoremap <Leader>gb :<C-R>=line('.')<CR>Gbrowse@ryan<CR>
 vnoremap <Leader>gb :Gbrowse@ryan<CR>
@@ -93,7 +93,6 @@ let g:ctrlp_user_command=['.git', 'cd %s && git ls-files . -co --exclude-standar
 let g:ctrlp_match_func={'match' : 'matcher#cmatch'}
 let g:ctrlp_extensions=['buffertag']
 let g:ctrlp_mruf_relative=1
-nnoremap <Leader><C-P> :CtrlPBufTag<CR>
 
 " EasyMotion {{{2
 let g:EasyMotion_do_mapping = 0
@@ -176,6 +175,9 @@ set ignorecase     " ignores case for search
 set smartcase      " overrides ignorecase if search pattern has upper case letters
 set gdefault       " defaults to the `g` flag for :s substitutions
 set hidden         " doesn't unload a buffer when it is no longer in a window
+
+set grepprg=ag\ --column
+set grepformat=%f:%l:%c:%m
 " Etc {{{2
 set backspace=eol,indent,start
 set completeopt=menuone " show completion menu even if only one match
@@ -212,17 +214,19 @@ nnoremap <silent>N Nzz
 " Makes */# not move cursor to next match
 nnoremap * *<C-O>
 nnoremap # #<C-O>
+" Add the <C-A> and <C-E> commands to insert/command modes
+inoremap <C-A> <C-O>^
+inoremap <C-E> <C-O>$
+cnoremap <C-A> <Home>
 " Shortcuts {{{2
 " Sets \ to remove highlighting when in normal mode
-nnoremap <silent>\ :noh<CR>
+nnoremap <silent> \ :noh<CR>
 " Maps Y to y$ to work like D and C
 nnoremap Y y$
 " Make Q run the q macro instead of Ex mode
 nnoremap Q @q
 " Quick switch between alternate buffers
 nnoremap <Leader><Leader><Space> <C-^>
-" Quick kill buffer
-nnoremap <silent> <Leader>bd <C-^>:bd #<CR>
 " Syntax Debugging {{{2
 " Allows looking up the syntax under the cursor
 function! ShowSynStack()
@@ -235,11 +239,6 @@ nnoremap <F10> :echo "hi<" .synIDattr(synID(line('.'),col('.'),1),'name'). '> tr
             \ .synIDattr(synID(line('.'),col('.'),0),'name'). '> lo<'
             \ .synIDattr(synIDtrans(synID(line('.'),col('.'),1)),'name'). '>'<CR>
 
-" Add the <C-A> and <C-E> commands to insert/command modes
-inoremap <C-A> <C-O>^
-inoremap <C-E> <C-O>$
-cnoremap <C-A> <Home>
-
 " Filetype Overrides: {{{1
 " ===================
 augroup FileTypeConfs
@@ -250,6 +249,7 @@ augroup FileTypeConfs
   autocmd BufRead,BufNewFile *.tpl set filetype=htmldjango
   autocmd BufRead,BufNewFile *.md set filetype=markdown
   autocmd BufRead,BufNewFile *.sh,zshrc,*deployment_notes.txt let b:is_bash=1 | set filetype=sh
+  autocmd BufRead,BufNewFile *requirements*.txt set filetype=config
 augroup END " }}}1
 
 " Miscellaneous Functions And Commands:
@@ -257,7 +257,7 @@ augroup END " }}}1
 " Debug Statements: {{{1
 " =================
 " Insert debugger/ipdb statement
-nnoremap <Leader><C-I> :call InsertDebugTrace()<CR>
+nnoremap <silent> <Leader><C-I> :call InsertDebugTrace()<CR>
 function! InsertDebugTrace()
   if (&ft == 'python')
     normal! Oimport ipdb; ipdb.set_trace()
@@ -310,7 +310,7 @@ function! s:block_write_ts()
 endfunction
 
 function! DeleteTS()
-  execute '%s/\s\+$//e'
+  execute 'keepjumps %s/\s\+$//e | normal! ``'
   call histdel('search', -1)
 endfunction
 
@@ -323,6 +323,20 @@ augroup TrailingWhitespace
 augroup END
 
 nnoremap <silent> <Leader>d$ :call DeleteTS()<CR>
+" Prettify: {{{1
+function! Prettify()
+  if &ft == 'xml'
+    exe '%!xmllint --format -'
+  elseif &ft == 'json'
+    exe '%!python -m json.tool'
+  endif
+endfunction
+" Ag: {{{1
+function! Ag(bang, args)
+  silent execute 'grep'.a:bang.' '.a:args
+  botright copen
+endfunction
+command! -bang -nargs=* Ag call Ag('<bang>', <q-args>)
 " }}}1
 
 " try to source local vimrc
