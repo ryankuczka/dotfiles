@@ -30,36 +30,35 @@ Plug 'Lokaltog/vim-easymotion'
 Plug 'airblade/vim-gitgutter'
 " Plug 'kshenoy/vim-signature'
 Plug 'christoomey/vim-tmux-navigator'
-" Color Schemes: {{{2
+" Color Schemes {{{2
 Plug 'jonathanfilip/vim-lucius'
 Plug 'altercation/vim-colors-solarized'
 Plug 'nanotech/jellybeans.vim'
 Plug 'w0ng/vim-hybrid'
-" Syntax Files: {{{2
+" Syntax Files {{{2
 Plug 'hdima/python-syntax', { 'for': 'python' }
 Plug 'pangloss/vim-javascript', { 'for': 'javascript' }
 Plug 'evanmiller/nginx-vim-syntax', { 'for': 'nginx' }
 Plug 'groenewege/vim-less', { 'for': 'less' }
-" }}}2
 call plug#end() " }}}1
 
 let mapleader = ','
 
 " Configure Plugins: {{{1
 " ==================
-" Fugitive: {{{2
+" Fugitive {{{2
 nnoremap <Leader>gs :Gstatus<CR>
 " open the current file on github
 nnoremap <Leader>gb :<C-R>=line('.')<CR>Gbrowse@ryan<CR>
 vnoremap <Leader>gb :Gbrowse@ryan<CR>
 
-" CommandCaps: {{{2
+" CommandCaps {{{2
 let g:commandcaps_override = 1
 
-" YouCompleteMe: {{{2
+" YouCompleteMe {{{2
 let g:ycm_collect_identifiers_from_tags_files = 1
 
-" Airline: {{{2
+" Airline {{{2
 let g:airline_powerline_fonts=1
 let g:airline_theme='ryan'
 let g:airline#extensions#hunks#non_zero_only = 1
@@ -67,18 +66,18 @@ let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#show_buffers = 0
 let g:airline#extensions#tabline#fnamemod = ':t'
 
-" Gundo: {{{2
+" Gundo {{{2
 nnoremap <Leader>u :GundoToggle<CR>
 let g:gundo_preview_bottom=1
 
-" IndentLine: {{{2
+" IndentLine {{{2
 let g:indentLine_char = '┊'
 let g:indentLine_setColors = 0
 
-" Instant Markdown: {{{2
+" Instant Markdown {{{2
 let g:instant_markdown_slow = 1
 
-" Syntastic: {{{2
+" Syntastic {{{2
 nnoremap <C-S> :SyntasticCheck<CR>
 let g:syntastic_mode_map = {'mode': 'passive'}
 let g:syntastic_auto_loc_list=1
@@ -88,7 +87,7 @@ let g:syntastic_python_flake8_args='--ignore=E501,E128,E261,E262'
 let g:syntastic_javascript_checkers=["jshint"]
 let g:syntastic_javascript_jshint_args='--config /sites/ycharts/confs/developers/jshint_conf.json'
 
-" CtrlP: {{{2
+" CtrlP {{{2
 let g:ctrlp_working_path_mode='wra'
 let g:ctrlp_max_files=0
 let g:ctrlp_user_command=['.git', 'cd %s && git ls-files . -co --exclude-standard', 'ag %s -l --nocolor -g ""']
@@ -97,7 +96,7 @@ let g:ctrlp_extensions=['buffertag']
 let g:ctrlp_mruf_relative=1
 nnoremap <Leader><C-P> :CtrlPBufTag<CR>
 
-" EasyMotion: {{{2
+" EasyMotion {{{2
 let g:EasyMotion_do_mapping = 0
 map <Leader>f <Plug>(easymotion-f)
 map <Leader>F <Plug>(easymotion-F)
@@ -107,31 +106,31 @@ map <Leader>s <Plug>(easymotion-s)
 map <Leader>; <Plug>(easymotion-next)
 map <Leader>. <Plug>(easymotion-repeat)
 
-" GitGutter: {{{2
+" GitGutter {{{2
 let g:gitgutter_realtime = 0
 let g:gitgutter_eager = 0
 
-" Signature: {{{2
+" Signature {{{2
 let g:SignatureMarkTextHL = 'SignColumn'
 
-" Python Syntax: {{{2
+" Python Syntax {{{2
 let g:python_version_2 = 1
 let g:python_highlight_all = 1
 let g:python_highlight_space_errors = 0
 
-" Javascript Syntax: {{{2
+" Javascript Syntax {{{2
 let g:javascript_ignore_javaScriptdoc = 1
 
 " Standard Options: {{{1
 " =================
-" Syntax Highlighting: {{{2
+" Syntax Highlighting {{{2
 syntax on
 
 set t_Co=256       " sets the number of colors to 256
 let g:base16colorspace=256
 colorscheme ryan-base16
 
-" Window Options: {{{2
+" Window Options {{{2
 set number
 set nowrap         " disables word wrapping
 set scrolloff=3    " ensures that at least 3 lines of context are always visible
@@ -159,29 +158,29 @@ else
     let &t_EI = "\<Esc>]50;CursorShape=0\x7"
   endif
 endif
-" Indentation: {{{2
+" Indentation {{{2
 set tabstop=4      " sets the length of the tab to 4 spaces
 set shiftwidth=4   " sets the (auto)indent to 4 spaces
 set softtabstop=4  " sets number of spaces to insert for a <Tab>
 set smarttab       " a <Tab> will insert 'shiftwidth' spaces
 set expandtab      " a <Tab> is expanded to spaces in Insert mode
 set autoindent     " auto indents
-" Command Line: {{{2
+" Command Line {{{2
 set wildmode=longest,list,full " specifies that pressing <Tab> will complete to longest common substring, then a list of options, then cycle through all options
 set wildmenu       " command line completion will show a menu of matches
 set wildignore=*.pyc " patterns to ignore for file name completion
-" Folding: {{{2
+" Folding {{{2
 set foldmethod=marker " allows setting a marker to specify where a fold occurs
 set foldmarker={{{,}}} " sets the fold marker to {{{ to start and }}} to end
 set foldlevel=99
-" Search: {{{2
+" Search {{{2
 set incsearch      " highlights as you search
 set hlsearch       " highlights search results
 set ignorecase     " ignores case for search
 set smartcase      " overrides ignorecase if search pattern has upper case letters
 set gdefault       " defaults to the `g` flag for :s substitutions
 set hidden         " doesn't unload a buffer when it is no longer in a window
-" Etc: {{{2
+" Etc {{{2
 set backspace=eol,indent,start
 set completeopt=menuone " show completion menu even if only one match
 set eol            " ensures the last line in the file has an end of line
@@ -202,7 +201,7 @@ if exists('&macmeta')
 endif
 " Useful Mappings: {{{1
 " ================
-" Movement: {{{2
+" Movement {{{2
 " Make j and k work better with wrapped lines
 noremap j gj
 noremap k gk
@@ -217,7 +216,7 @@ nnoremap <silent>N Nzz
 " Makes */# not move cursor to next match
 nnoremap * *<C-O>
 nnoremap # #<C-O>
-" Shortcuts: {{{2
+" Shortcuts {{{2
 " Sets \ to remove highlighting when in normal mode
 nnoremap <silent>\ :noh<CR>
 " Maps Y to y$ to work like D and C
@@ -228,7 +227,7 @@ nnoremap Q @q
 nnoremap <Leader><Leader><Space> <C-^>
 " Quick kill buffer
 nnoremap <silent> <Leader>bd <C-^>:bd #<CR>
-" Syntax Debugging: {{{2
+" Syntax Debugging {{{2
 " Allows looking up the syntax under the cursor
 function! ShowSynStack()
   for id in synstack(line("."), col("."))
@@ -328,7 +327,7 @@ augroup TrailingWhitespace
 augroup END
 
 nnoremap <silent> <Leader>d$ :call DeleteTS()<CR>
-" }}}
+" }}}1
 
 " try to source local vimrc
 if filereadable(glob("~/.vimrc.local"))
