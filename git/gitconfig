@@ -19,6 +19,7 @@
     lg = !git --no-pager log -n 25 --format=format:'%C(yellow)%h - %C(red)%ar%C(reset) %C(green)<%an> %C(reset)%s%C(bold yellow)%d%C(reset)'
     st = status -sb
     ctags = !.git/hooks/ctags
+    vtag = !git tag -l | sort -n -t. -k1,1 -k2,2 -k3,3 -k4,4
 
 [web]
     browser = open

@@ -1,6 +1,6 @@
 tags
 node_modules
 .git/**
-*.pyc
-*.swp
-*.pdf
+*pyc
+*swp
+*pdf
