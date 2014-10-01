@@ -1,4 +1,5 @@
 export DOTFILES_DIR=/repos/dotfiles
+export ZSH_THEME="ryan-base16"
 ##################
 # MISC ZSH OPTIONS
 ##################
@@ -37,6 +38,11 @@ source /usr/local/bin/virtualenvwrapper.sh
 #############
 # ZSH PLUGINS
 #############
+# Themes
+if [[ -n $ZSH_THEME ]] && [[ -f $DOTFILES_DIR/zsh/themes/${ZSH_THEME}.zsh-theme ]]; then
+    source $DOTFILES_DIR/zsh/themes/${ZSH_THEME}.zsh-theme
+fi
+
 # Set up compinit
 autoload -U compinit
 compinit -d $DOTFILES_DIR/zsh/cache/zcomp-${HOST/.*/}
