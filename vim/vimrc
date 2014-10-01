@@ -13,8 +13,6 @@ Plug 'Shougo/unite.vim'
 Plug 'Shougo/unite-outline'
 Plug 'tsukkee/unite-help'
 Plug 'Shougo/vimproc.vim', { 'do': 'make' }
-Plug 'Shougo/neocomplete.vim'
-Plug 'davidhalter/jedi-vim'
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-abolish'
@@ -25,6 +23,7 @@ Plug 'tpope/vim-vinegar'
 Plug 'tpope/vim-eunuch'
 Plug 'takac/vim-commandcaps'
 Plug 'bling/vim-airline'
+Plug 'Valloric/YouCompleteMe'
 Plug 'sjl/gundo.vim', { 'on': 'GundoToggle' }
 Plug 'Yggdroot/indentLine'
 Plug 'suan/vim-instant-markdown', { 'for': 'markdown' }
@@ -106,29 +105,6 @@ augroup UniteSettings
   autocmd!
   autocmd FileType unite call <SID>unite_settings()
 augroup END " }}}3
-
-" Neocomplete: {{{2
-" Basic Neocomplete Settings {{{3
-let g:neocomplete#enable_at_startup = 1
-let g:neocomplete#enable_smart_case = 1
-
-" <Tab> Completion {{{3
-function! s:neocomplete_tab_func(backward)
-  return pumvisible() ? (a:backward ? "\<C-P>" : "\<C-N>") : (a:backward ? "\<S-Tab>" : "\<Tab>")
-endfunction
-inoremap <silent> <Tab> <C-R>=<SID>neocomplete_tab_func(0)<CR>
-inoremap <silent> <S-Tab> <C-R>=<SID>neocomplete_tab_func(1)<CR>
-
-" Jedi Autocompletion {{{3
-let g:jedi#completions_enabled = 0
-let g:jedi#auto_vim_configuration = 0
-let g:jedi#auto_initialization = 0
-
-if !exists('g:neocomplete#force_omni_input_patterns')
-  let g:neocomplete#force_omni_input_patterns = {}
-endif
-let g:neocomplete#force_omni_input_patterns.python =
-      \ '\%([^. \t]\.\|^\s*@\|^\s*from\s.\+import \|^\s*from \|^\s*import \)\w*' " }}}3
 
 " Fugitive {{{2
 nnoremap <Leader>gs <C-W>o:Gstatus<CR>
