@@ -131,6 +131,10 @@ if colors_name == 'solarized'
   hi GitGutterDelete ctermbg=8 ctermfg=1
   hi GitGutterChange ctermbg=8 ctermfg=3
   hi GitGutterChangeDelete ctermbg=8 ctermfg=3
+elseif colors_name == 'hybrid'
+  hi Conceal ctermbg=NONE
+  hi Search ctermfg=0
+  hi DiffDelete ctermfg=0
 endif
 
 " Window Options {{{2
