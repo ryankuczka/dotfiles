@@ -38,6 +38,7 @@ Plug 'jonathanfilip/vim-lucius'
 Plug 'altercation/vim-colors-solarized'
 Plug 'nanotech/jellybeans.vim'
 Plug 'w0ng/vim-hybrid'
+Plug 'whatyouhide/vim-gotham'
 " Syntax Files {{{2
 Plug 'hdima/python-syntax', { 'for': 'python' }
 Plug 'pangloss/vim-javascript', { 'for': 'javascript' }
@@ -252,7 +253,7 @@ set smartcase      " overrides ignorecase if search pattern has upper case lette
 set gdefault       " defaults to the `g` flag for :s substitutions
 set hidden         " doesn't unload a buffer when it is no longer in a window
 
-set grepprg=ag\ --column
+set grepprg=ag\ --vimgrep
 set grepformat=%f:%l:%c:%m
 " Etc {{{2
 set backspace=eol,indent,start

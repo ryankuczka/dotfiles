@@ -6,3 +6,4 @@ tags
 .env
 node_modules/*
 .agignore
+*.egg-info
