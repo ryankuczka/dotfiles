@@ -20,7 +20,6 @@ cwd_prompt () {
 git_status_prompt () {
     local index="$(git status --porcelain -b 2> /dev/null)"
     local stat=""
-    local suffix=""
 
     local added="$(echo "$index" | grep -c '^[AM]  ')"
     local modified="$(echo "$index" | grep -c '^ M \|^AM \|^ T ')"
@@ -79,23 +78,22 @@ right_prompt () {
         print -n "$FG[$ZSH_PROMPT_BG_B]$sep$FG[$ZSH_PROMPT_FG_B]$BG[$ZSH_PROMPT_BG_B]  ${branch:t} "
     fi
 
-    local next_prefix="$FG[$ZSH_PROMPT_BG_C]$sep$FG[$ZSH_PROMPT_FG_C]$BG[$ZSH_PROMPT_BG_C]"
-
     local ahead_behind="$(git_ahead_behind_prompt)"
-    if [[ -n $ahead_behind ]] && [[ -z $gstat ]]; then
-        print -n "$next_prefix$ahead_behind "
-        next_prefix="$sep_alt"
+    if [[ -n $ahead_behind ]]; then
+        print -n "$sep_alt$ahead_behind "
     fi
 
     local gstat="$(git_status_prompt)"
     if [[ -n $gstat ]]; then
-        print -n "$next_prefix$gstat "
-        next_prefix="$sep_alt"
+        print -n "$sep_alt$gstat "
     fi
 
     if [[ -n "$(git ls-files --others --exclude-standard 2>/dev/null)" ]]; then
-        print -n "$next_prefix + "
+        print -n "$sep_alt + "
     fi
+
+    local dt="$(date +'%I:%M')"
+    print -n "$FG[$ZSH_PROMPT_BG_C]$sep$FG[$ZSH_PROMPT_FG_C]$BG[$ZSH_PROMPT_BG_C] $dt "
 
     print -n "$FX[reset]"
 }
