@@ -195,6 +195,10 @@ elseif colors_name == 'hybrid'
   hi Conceal ctermbg=NONE
   hi Search ctermfg=0
   hi DiffDelete ctermfg=0
+elseif colors_name == 'lucius'
+  hi Conceal ctermbg=NONE
+  hi SignColumn ctermbg=234
+  hi LineNr ctermbg=234
 endif
 
 " Window Options {{{2

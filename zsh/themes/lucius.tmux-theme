@@ -1,0 +1,24 @@
+# Set colors and styles
+set -g status "on"
+set -g status-utf8 "on"
+set -g status-justify "left"
+set -g status-style "bg=colour236,none"
+
+set -g message-style "fg=colour250,bg=colour236"
+set -g message-command-style "fg=colour250,bg=colour236"
+set -g pane-border-style "fg=colour236"
+set -g pane-active-border-style "fg=colour67"
+
+set -g status-left "#[fg=colour236,bg=colour67,bold] #S #[fg=colour67,bg=colour236,nobold,nounderscore,noitalics]"
+set -g status-left-style "none"
+set -g status-left-length "100"
+set -g status-right "#[fg=colour239,bg=colour236,nobold,nounderscore,noitalics]#[fg=colour250,bg=colour239] %Y-%m-%d  %I:%M #[fg=colour67,bg=colour239,nobold,nounderscore,noitalics]#[fg=colour236,bg=colour67] #h "
+set -g status-right-style "none"
+set -g status-right-length "100"
+
+setw -g window-status-activity-attr "none"
+setw -g window-status-activity-style "fg=colour1,bg=colour236,none"
+setw -g window-status-separator ""
+setw -g window-status-style "fg=colour250,bg=colour236,none"
+setw -g window-status-format "#[fg=colour250,bg=colour236] #I  #W "
+setw -g window-status-current-format "#[fg=colour236,bg=colour239,nobold,nounderscore,noitalics]#[fg=colour250,bg=colour239] #I  #W #[fg=colour239,bg=colour236,nobold,nounderscore,noitalics]"
