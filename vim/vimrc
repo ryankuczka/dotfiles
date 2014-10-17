@@ -24,6 +24,7 @@ Plug 'tpope/vim-eunuch'
 Plug 'takac/vim-commandcaps'
 Plug 'bling/vim-airline'
 Plug 'Valloric/YouCompleteMe'
+Plug 'SirVer/ultisnips'
 Plug 'sjl/gundo.vim', { 'on': 'GundoToggle' }
 Plug 'Yggdroot/indentLine'
 Plug 'suan/vim-instant-markdown', { 'for': 'markdown' }
@@ -118,6 +119,12 @@ let g:commandcaps_override = 1
 
 " YouCompleteMe {{{2
 let g:ycm_collect_identifiers_from_tags_files = 1
+
+" UltiSnips {{{2
+let g:UltiSnipsEditSplit = "vertical"
+let g:UltiSnipsExpandTrigger = "<C-E>"
+let g:UltiSnipsJumpForwardTrigger = "<Tab>"
+let g:UltiSnipsJumpBackwardTrigger = "<S-Tab>"
 
 " Airline {{{2
 let g:airline_powerline_fonts=1
