@@ -4,3 +4,5 @@ node_modules
 *pyc
 *swp
 *pdf
+embeds/static/embeds
+api/docs

@@ -83,7 +83,11 @@ call <sid>hi('Title'       , '13',   '', '')
 call <sid>hi('Conceal'     ,  '3',  '0', '')
 call <sid>hi('Cursor'      ,  '0',  '5', '')
 call <sid>hi('NonText'     ,  '3',   '', '')
-call <sid>hi('Normal'      ,  '4',  '0', '')
+if exists('g:base16_transparent_bg') && g:base16_transparent_bg
+  call <sid>hi('Normal'    ,  '4',   '', '')
+else
+  call <sid>hi('Normal'    ,  '4',  '0', '')
+endif
 call <sid>hi('LineNr'      ,  '3',  '1', '')
 call <sid>hi('SignColumn'  , '13',  '1', '')
 call <sid>hi('StatusLine'  ,  '4',  '2', 'bold')
@@ -155,9 +159,9 @@ call <sid>hi('pythonBytesEscape', '8', '', 'bold')
 
 " Javascript Highlighting: {{{1
 " ========================
-call <sid>hi('javaScript'      ,  '5', '', '')
-call <sid>hi('javaScriptBraces', '13', '', 'bold')
-call <sid>hi('javaScriptNumber',  '9', '', '')
+call <sid>hi('jsBraces',       '13', '', '')
+call <sid>hi('jsBrackets',     '13', '', '')
+call <sid>hi('jsFuncBraces',   '13', '', '')
 
 " Git Highlighting: {{{1
 " =================

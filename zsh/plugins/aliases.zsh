@@ -15,7 +15,6 @@ alias md='mkdir -p'
 alias history='fc -fl 1'
 
 # Git
-alias git="hub"
 alias g='git'
 compdef g=git
 alias gd='git diff'
@@ -66,14 +65,14 @@ alias gstd='git stash drop'
 alias gss="git status -sb"
 alias glg="git --no-pager log -n 25 --format=format:'%C(reset)%C(yellow)%h - %C(red)%ar%C(reset) %C(green)<%an> %C(reset)%s%C(bold yellow)%d'"
 alias glgg="git log --format=format:'%C(reset)%C(yellow)%h - %C(red)%ar%C(reset) %C(green)<%an> %C(reset)%s%C(bold yellow)%d'"
+alias gf="git fetch"
 
 # Pretty Printing JSON
+alias pp_json='python -mjson.tool'
 if [[ $(whence node) != "" ]]; then
-    alias pp_json='xargs -0 node -e "console.log(JSON.stringify(JSON.parse(process.argv[1]), null, 4));"'
     alias urlencode='node -e "console.log(encodeURIComponent(process.argv[1]))"'
     alias urldecode='node -e "console.log(decodeURIComponent(process.argv[1]))"'
 elif [[ $(whence python) != "" ]]; then
-    alias pp_json='python -mjson.tool'
     alias urlencode='python -c "import sys, urllib as ul; print ul.quote_plus(sys.argv[1])"'
     alias urldecode='python -c "import sys, urllib as ul; print ul.unquote_plus(sys.argv[1])"'
 fi

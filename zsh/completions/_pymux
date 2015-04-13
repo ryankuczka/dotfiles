@@ -1,0 +1,38 @@
+#compdef pymux
+#autoload
+
+# pymux zsh completion
+
+_pymux_projects() {
+    local -a projects
+    projects=(`find $HOME/.pymux/ -name \*.json | awk -F/ '{print $NF}' | sed s:.json::g`)
+    _arguments '*:projects:($projects)'
+}
+
+_pymux() {
+
+    local -a commands
+    commands=(
+        'config:Print the current project'\''s config.'
+        'create:Create a new pymux project and open its config file for editing.'
+        'debug:Print the commands that will be run on '\''start'\''.'
+        'delete:Delete a project.'
+        'edit:Open an existing project'\''s config file for editing.'
+        'list:List all existing projects.'
+        'kill:Kill a running session. Convenience for '\''tmux kill-session'\''.'
+        'start:Start a project'\''s tmux session or switch to it if it already exists.'
+    )
+
+    if (( CURRENT == 2 )); then
+        _arguments -C \
+            {-c,--config}'[KEY VALUE pair to override config]'
+
+        _describe -t commands 'commands' commands
+    elif (( CURRENT == 3 )); then
+        _pymux_projects
+    fi
+
+    return 0
+}
+
+_pymux

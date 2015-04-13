@@ -176,9 +176,28 @@ tn() {
 psgrep() {
     local PSOUT="$(ps -o "user,pid,ppid,pcpu,pmem,start,etime,command" -e)"
     if [[ $# -eq 0 ]]; then
-        echo $PSOUT
+        echo $PSOUT | less -S
     else
         echo $PSOUT | head -n1
         echo $PSOUT | grep --color $@ | less -S
     fi
+}
+
+# Texting!
+txt() {
+    local number="3032634659"
+
+    if [[ $1 =~ "[0-9]+" ]]; then
+        number="$1"
+        shift
+    fi
+
+    if [[ $# -eq 0 ]]; then
+        echo "You must supply a message!" >&2
+        return 1
+    fi
+
+    local message="$@"
+
+    sendmail -f "mathwiz1991@gmail.com" "$number@vtext.com" <<< "$message"
 }

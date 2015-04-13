@@ -25,7 +25,7 @@ fpath=($DOTFILES_DIR/zsh/functions $DOTFILES_DIR/zsh/completions $fpath)
 ###################
 # Force unique entries in PATH
 typeset -Ug path
-path=(/usr/local/bin $path $HOME/bin /usr/local/share/npm/bin /opt/chef/embedded/bin /usr/local/heroku/bin)
+path=(/usr/local/bin $path $HOME/bin /usr/local/share/npm/bin)
 
 ###################
 # PYTHON VIRTUALENV
@@ -85,3 +85,13 @@ export LC_CTYPE=$LANG
 # Allow use of ^S and ^Q in vim
 stty -ixon -ixoff
 stty stop undef
+
+# RVM
+path=($path $HOME/.rvm/bin)
+fpath=($HOME/.rvm/scripts/zsh/Completion $fpath)
+[[ -s $HOME/.rvm/scripts/rvm ]] && source $HOME/.rvm/scripts/rvm
+##########################
+# PLATFORM SPECIFIC CONFIG
+##########################
+# Ubuntu
+[[ -s /etc/zsh_command_not_found ]] && source /etc/zsh_command_not_found
