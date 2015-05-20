@@ -81,7 +81,7 @@ let g:ycm_collect_identifiers_from_comments_and_strings = 1
 
 " Airline {{{2
 let g:airline_powerline_fonts=1
-let g:airline_theme='ryanbase16'
+let g:airline_theme='ryansolarized'
 let g:airline#extensions#hunks#non_zero_only = 1
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#show_buffers = 0
@@ -179,22 +179,28 @@ syntax on
 
 set t_Co=256       " sets the number of colors to 256
 set background=dark
-colorscheme ryan-base16
+colorscheme solarized
 
 if g:colors_name == 'solarized'
-  hi SignColumn ctermbg=8
-  hi GitGutterAdd ctermbg=8 ctermfg=2
-  hi GitGutterDelete ctermbg=8 ctermfg=1
-  hi GitGutterChange ctermbg=8 ctermfg=3
-  hi GitGutterChangeDelete ctermbg=8 ctermfg=3
-elseif g:colors_name == 'hybrid'
+  hi Folded cterm=bold gui=bold
+  hi Error ctermfg=12 ctermbg=15 guifg=#002b36 guibg=#dc322f
+  hi GitGutterAdd ctermfg=2 ctermbg=0 guifg=#719e07 guibg=#073642
+  hi GitGutterDelete ctermfg=1 ctermbg=0 guifg=#dc322f guibg=#073642
+  hi GitGutterChange ctermfg=3 ctermbg=0 guifg=#b58900 guibg=#073642
+  hi link GitGutterChangeDelete GitGutterChange
+  if &background == 'light'
+    hi GitGutterAdd ctermbg=7 guibg=#eee8d5
+    hi GitGutterDelete ctermbg=7 guibg=#eee8d5
+    hi GitGutterChange ctermbg=7 guibg=#eee8d5
+  endif
+elseif g:colors_name == 'hybrid' || g:colors_name == 'hybrid-light'
   hi Conceal ctermbg=NONE guibg=NONE
   hi Search ctermfg=0
   hi DiffDelete ctermfg=0
 elseif g:colors_name == 'lucius'
   hi Conceal ctermbg=NONE guibg=NONE
-  hi SignColumn ctermbg=234
-  hi LineNr ctermbg=234
+  hi SignColumn ctermbg=238 guibg=#444444
+  hi LineNr ctermbg=238 guibg=#444444
 endif
 
 " Window Options {{{2
@@ -221,7 +227,7 @@ set mouse=a
 
 " Sets GUI Font and options
 if has('gui_running')
-  set guifont=Sauce\ Code\ Powerline:h13
+  set guifont=Input\ Mono\ Compressed:h14
   set guioptions=gmtc
 else
   " Sets cursor to a bar in insert mode
