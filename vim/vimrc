@@ -426,8 +426,7 @@ endfunction
 
 function! DeleteTS()
   let l:cursor_pos = getpos('.')
-  execute 'keepjumps %s/\s\+$//e'
-  call histdel('search', -1)
+  keepjumps keeppatterns %s/\s\+$//e
   call setpos('.', l:cursor_pos)
 endfunction
 
@@ -440,6 +439,7 @@ augroup TrailingWhitespace
 augroup END
 
 nnoremap <silent> <Leader>d$ :call DeleteTS()<CR>
+
 " Prettify: {{{1
 function! Prettify()
   if &ft == 'xml'
@@ -448,25 +448,27 @@ function! Prettify()
     exe '%!python -m json.tool'
   endif
 endfunction
+command! Prettify call Prettify()
+
 " Ag: {{{1
-function! Ag(bang, args)
-  silent execute 'grep'.a:bang.' '.a:args
+function! Ag(...)
+  if a:0 == 0
+    execute 'grep! '.substitute(getreg('/'), '\\<\|\\>', '\\\\b', 'g')
+  else
+    execute 'grep! '.join(a:000, ' ')
+  endif
   botright copen
 endfunction
-command! -bang -nargs=* Ag call Ag('<bang>', <q-args>)
+command! -nargs=* Ag call Ag(<f-args>)
 
-" Diff: {{{1
-function! DiffSettings()
-  if &diff
-    echom "Setting up for diff"
-    setlocal foldmethod=diff
+" NewTab: {{{1
+function! NewTab(dir)
+  tabnew
+  if a:dir != ''
+    execute 'lcd '.a:dir
   endif
 endfunction
-
-augroup DiffSetup
-  autocmd!
-  autocmd BufNew * call DiffSettings()
-augroup END
+command! -complete=dir -nargs=1 NewTab call NewTab(<q-args>)
 " }}}1
 
 " try to source local vimrc
