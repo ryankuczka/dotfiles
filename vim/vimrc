@@ -38,9 +38,11 @@ Plug 'guns/xterm-color-table.vim'
 Plug 'ap/vim-css-color'
 Plug 'gregsexton/MatchTag', { 'for': ['html', 'xml', 'htmldjango'] }
 Plug 'Konfekt/FastFold'
-Plug 'christoomey/vim-tmux-navigator'
-Plug 'tmux-plugins/vim-tmux-focus-events'
-Plug 'tmux-plugins/vim-tmux'
+if exists('$TMUX')
+  Plug 'christoomey/vim-tmux-navigator'
+  Plug 'tmux-plugins/vim-tmux-focus-events'
+  Plug 'tmux-plugins/vim-tmux'
+endif
 " Color Schemes {{{2
 Plug 'jonathanfilip/vim-lucius'
 Plug 'altercation/vim-colors-solarized'
@@ -59,6 +61,7 @@ Plug 'ingydotnet/yaml-vim'
 call plug#end() " }}}1
 
 let mapleader = ','
+let maplocalleader = ','
 
 " Configure Plugins: {{{1
 " ==================
@@ -103,6 +106,7 @@ let g:syntastic_python_checkers=["flake8"]
 let g:syntastic_python_flake8_args='--ignore=E501,E128,E261,E262'
 let g:syntastic_javascript_checkers=["jshint"]
 let g:syntastic_javascript_jshint_args='--config /sites/ycharts/confs/developers/jshint_conf.json'
+let g:syntastic_sh_checkers=["shellcheck"]
 
 " CtrlP {{{2
 let g:ctrlp_working_path_mode='wra'
@@ -201,6 +205,7 @@ set laststatus=2
 set noshowmode
 set noruler        " shows line,col in bottom right
 set showcmd        " shows the partial command in the lower right
+set lazyredraw     " don't redraw window while executing macros/etc.
 " turns tabs into , shows  for text extending beyond window
 " and  for text extending left of window
 set list listchars=tab:,extends:,precedes:
@@ -209,6 +214,10 @@ set timeout timeoutlen=1000 ttimeoutlen=10
 
 " Turn off bell and visualbell
 set visualbell t_vb=
+
+" Set terminal/mouse support
+set t_RV= ttymouse=xterm2
+set mouse=a
 
 " Sets GUI Font and options
 if has('gui_running')
@@ -235,7 +244,7 @@ set shiftround     " force indentation to multiple of shiftwidth
 
 if has('linebreak')
   set linebreak      " break wrapped lines at normal characters instead of last
-  " set breakindent    " make wrapped lines have same indentation
+  set breakindent    " make wrapped lines have same indentation
   let &showbreak = '↪ ' " start wrapped lines with this char
 endif
 " Command Line {{{2
@@ -252,32 +261,48 @@ set hlsearch       " highlights search results
 set ignorecase     " ignores case for search
 set smartcase      " overrides ignorecase if search pattern has upper case letters
 set gdefault       " defaults to the `g` flag for :s substitutions
-set hidden         " doesn't unload a buffer when it is no longer in a window
 
 set grepprg=ag\ --vimgrep
 set grepformat=%f:%l:%c:%m
+
+" Files/Buffers {{{2
+set hidden         " doesn't unload a buffer when it is no longer in a window
+set undofile
+set undodir=~/.vim/undodir// " store undo files here
+set directory=~/.vim/swapfiles// " store swap (.swp) files here
+set backupdir=~/.vim/backups// " store backup files (~) here
 
 " Etc {{{2
 set backspace=eol,indent,start
 set completeopt=menuone " show completion menu even if only one match
 set eol            " ensures the last line in the file has an end of line
 set virtualedit=block " only allows the cursor to go where there is no character in Visual Block mode
-set undofile       " save/restore undo history
-set undodir=~/.vim/undodir " store undo files in ~/.vim/undodir
-set directory=~/.vim/swapfiles// " store swap (.swp) files in ~/.vim/swapfiles
-set backupdir=~/.vim/backups// " store backup files (~) in ~/.vim/backups
-set t_RV= ttymouse=xterm2
-set mouse=a
 
 set autoread       " when a file is changed by a program other than vim while a buffer is open, automatically reload it
 set nostartofline  " makes it so G, gg, <C-D>, etc. don't move cursor to start of the line
 set modeline       " Allow for modelines
+
+set diffopt=filler,vertical " add filler lines and always use vertical
+set nojoinspaces   " only add one space when joining lines
 
 set sessionoptions-=options " don't save options in sessions, it gets wonky
 
 if exists('&macmeta')
   set macmeta
 endif
+
+" Neovim Options {{{2
+if has('nvim')
+  " Bar cursor in insert mode
+  let $NVIM_TUI_ENABLE_CURSOR_SHAPE=1
+
+  " Terminal scrollback size
+  let g:terminal_scrollback_buffer_size = 100000
+
+  " Insert mode when entering terminals
+  au WinEnter term://* call feedkeys('i')
+endif
+
 " Useful Mappings: {{{1
 " ================
 " Movement {{{2
@@ -288,6 +313,12 @@ noremap k gk
 inoremap <C-A> <C-O>^
 inoremap <C-E> <C-O>$
 cnoremap <C-A> <Home>
+
+" Window Movement
+nnoremap <C-H> <C-W>h
+nnoremap <C-J> <C-W>j
+nnoremap <C-K> <C-W>k
+nnoremap <C-L> <C-W>l
 
 " Shortcuts {{{2
 " Maps Y to y$ to work like D and C
