@@ -2,8 +2,6 @@
 slate.configAll({
     'defaultToCurrentScreen': true
 });
-var monLaptop = '1440x900',
-    monDell = '1920x1200';
 
 // WINDOW RESIZING
 var fullScreen = slate.operation('corner', {
@@ -30,18 +28,27 @@ slate.bindAll({
 });
 
 // WINDOW MOVEMENT
-var throwToScreen = function(screen) {
-    return slate.operation('sequence', {
-        'operations': [
-            slate.operation('throw', {'screen': screen}),
-            fullScreen
-        ]
-    });
+var throwToScreen = function(direction) {
+    return function() {
+        var nextScreenId = slate.screen().id() + direction * 1;
+        slate.log(nextScreenId);
+        if (nextScreenId < 0) {
+            nextScreenId = 0;
+        } else if (nextScreenId > slate.screenCount()) {
+            nextScreenId = slate.screenCount();
+        }
+        slate.operation('sequence', {
+            'operations': [
+                slate.operation('throw', {'screen': nextScreenId}),
+                fullScreen
+            ]
+        }).run();
+    };
 };
 
 slate.bindAll({
-    'left:cmd,ctrl': throwToScreen(monLaptop),
-    'right:cmd,ctrl': throwToScreen(monDell)
+    'left:cmd,ctrl': throwToScreen(-1),
+    'right:cmd,ctrl': throwToScreen(1)
 });
 
 // APP SWITCHING
@@ -49,11 +56,34 @@ var focusApp = function(app) {
     return slate.operation('focus', {'app': app});
 };
 
+var toggleMacvimIterm = function(winObj) {
+    if (winObj && winObj.app().name() === 'MacVim') {
+        focusApp('iTerm2').run();
+    } else {
+        focusApp('MacVim').run();
+    }
+};
+
+var switchItermWins = function(winObj) {
+    if (winObj && winObj.app().name() === 'iTerm2') {
+        if (winObj.screen().id() === 2) {
+            slate.operation('focus', {'direction': 'left'}).run();
+        } else {
+            slate.operation('focus', {'direction': 'right'}).run();
+        }
+    } else {
+        focusApp('iTerm2').run();
+    }
+};
+
+
 slate.bindAll({
     'm:space,ctrl': focusApp('MacVim'),
-    'i:space,ctrl': focusApp('iTerm'),
+    'i:space,ctrl': focusApp('iTerm2'),
+    'space:space,ctrl': toggleMacvimIterm,
     'c:space,ctrl': focusApp('Google Chrome'),
     'f:space,ctrl': focusApp('Finder'),
+    'g:space,ctrl': focusApp('Radiant Player'),
     'r:space,ctrl': slate.operation('relaunch'),
     'h:space,ctrl': slate.operation('hint', {'characters': 'asdfghjkl'})
 });
