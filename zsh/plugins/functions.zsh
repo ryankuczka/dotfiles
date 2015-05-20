@@ -119,7 +119,6 @@ zsh-django-cache-commands() {
     fi
 
     if [[ ! -f $DOTFILES_DIR/zsh/cache/django_commands ]]; then
-        echo -n "(...caching django command index...)"
         tmp_cache=/tmp/zsh_tmp_cache
         python manage.py help 2>/dev/null | \
             zsh-django-clean-commands >> $tmp_cache
@@ -134,7 +133,6 @@ zsh-django-cache-apps() {
     fi
 
     if [[ ! -f $DOTFILES_DIR/zsh/cache/django_apps ]]; then
-        echo -n "(...caching django app index...)"
         tmp_cache=/tmp/zsh_tmp_cache
         python -c "import re, django.conf, sys;[sys.stdout.write(re.sub(r'.*\.([a-z_]+)$', r'\1', i) + '\n') for i in django.conf.settings.INSTALLED_APPS]" >> $tmp_cache
         sort $tmp_cache | uniq | tr '\n' ' ' > $DOTFILES_DIR/zsh/cache/django_apps
