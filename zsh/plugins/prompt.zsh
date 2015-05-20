@@ -1,23 +1,26 @@
-cwd_prompt () {
-    local cwd="${PWD/$HOME/~}"
-    local formatted_cwd=""
-    local part_count=0
-    local first_char=$cwd[1,1]
+zmodload zsh/datetime
+autoload -Uz add-zsh-hook
 
-    while [[ $cwd == */* && $cwd != "/" ]]; do
-        local part="${cwd:t}"
-        cwd="${cwd:h}"
-
-        formatted_cwd=" $part $formatted_cwd"
-        part_count=$(( part_count + 1 ))
-
-        [[ $part_count -eq 3 ]] && formatted_cwd="⋯ $formatted_cwd" && break
-    done
-
-    print -n "$first_char $formatted_cwd"
+prompt_human_time () {
+    local tmp=$1
+    local days=$(( tmp / 60 / 60 / 24 ))
+    local hours=$(( tmp / 60 / 60 % 24 ))
+    local minutes=$(( tmp / 60 % 60 ))
+    local seconds=$(( tmp % 60 ))
+    (( $days > 0 )) && print -n "${days}d "
+    (( $hours > 0 )) && print -n "${hours}h "
+    (( $minutes > 0 )) && print -n "${minutes}m "
+    print -n "${seconds}s"
 }
 
-git_status_prompt () {
+prompt_cmd_exec_time () {
+    local cmd_stop=$EPOCHSECONDS
+    local cmd_start=${cmd_timestamp:-$cmd_stop}
+    local elapsed=$(( cmd_stop - cmd_start ))
+    prompt_human_time $elapsed
+}
+
+prompt_git_status () {
     local index="$(git status --porcelain -b 2> /dev/null)"
     local stat=""
 
@@ -26,84 +29,153 @@ git_status_prompt () {
     local renamed="$(echo "$index" | grep -c '^R  ')"
     local deleted="$(echo "$index" | grep -c '^ D \|^D  \|^AD ')"
     local unmerged="$(echo "$index" | grep -c '^UU ')"
+    local untracked="$(echo "$index" | grep -c '^?? ')"
 
-    [[ $added -gt 0 ]] && stat=" ${added}A$stat"
-    [[ $modified -gt 0 ]] && stat=" ${modified}M$stat"
-    [[ $renamed -gt 0 ]] && stat=" ${renamed}R$stat"
-    [[ $deleted -gt 0 ]] && stat=" ${deleted}D$stat"
     [[ $unmerged -gt 0 ]] && stat=" ${unmerged}U$stat"
+    [[ $untracked -gt 0 ]] && stat=" ${untracked}?$stat"
+    [[ $deleted -gt 0 ]] && stat=" ${deleted}D$stat"
+    [[ $renamed -gt 0 ]] && stat=" ${renamed}R$stat"
+    [[ $modified -gt 0 ]] && stat=" ${modified}M$stat"
+    [[ $added -gt 0 ]] && stat=" ${added}A$stat"
 
-    print -n "$stat"
+    print -n "$(echo $stat | sed -e 's/^ //')"
 }
 
-git_ahead_behind_prompt () {
-    ahead_behind=""
+prompt_git_ahead_behind () {
+    local ahead_behind=""
 
     set -- $(git rev-list --left-right --count @{upstream}...HEAD 2> /dev/null)
-    local behind_count=$1
-    local ahead_count=$2
-    [[ $behind_count -gt 0 ]] && ahead_behind=" ${behind_count}↓$ahead_behind"
-    [[ $ahead_count -gt 0 ]] && ahead_behind=" ${ahead_count}↑$ahead_behind"
+    [[ $1 -gt 0 ]] && ahead_behind=" $1↓$ahead_behind"
+    [[ $2 -gt 0 ]] && ahead_behind=" $2↑$ahead_behind"
 
-    print -n "$ahead_behind"
+    print -n "$(echo $ahead_behind | sed -e 's/^ //')"
 }
 
-left_prompt () {
-    local sep=""
-    local sep_alt=""
+prompt_cwd () {
+    local cwd="${PWD/$HOME/~}"
+    local formatted_cwd=""
+    local part_count=0
+    local first_char=${cwd[1,1]/\//}
 
+    while [[ $cwd == */* && $cwd != "/" ]]; do
+        local part="${cwd:t}"
+        cwd="${cwd:h}"
+
+        formatted_cwd="/$part$formatted_cwd"
+        part_count=$(( part_count + 1 ))
+
+        if [[ $part_count -eq 3 && $cwd != "/" ]]; then
+            formatted_cwd="...$formatted_cwd"
+            break
+        fi
+    done
+    print -n "$first_char$formatted_cwd"
+}
+
+prompt_virtual_env () {
     if [[ -n $VIRTUAL_ENV ]]; then
-        print -n "$BG[$ZSH_PROMPT_BG_A]$FG[$ZSH_PROMPT_FG_A]$FX[bold] ${VIRTUAL_ENV:t} $FX[reset]$FG[$ZSH_PROMPT_BG_A]$BG[$ZSH_PROMPT_BG_B]$sep "
+        print -n "%F{blue}(%F{yellow}${VIRTUAL_ENV:t}%F{blue})%f "
+    fi
+}
+
+left_prompt_cmd () {
+    local zero='%([BSUbfksu]|([FB]|){*})'
+
+    prompt_msg="$(prompt_virtual_env)$(prompt_cwd) "
+
+    prompt_msg_len=${#${(S%%)prompt_msg//$~zero/}}
+    local fillsize=$(( COLUMNS - prompt_msg_len - 10 ))
+    while (( $fillsize > 0 )); do
+        prompt_msg="${prompt_msg}─"
+        fillsize=$(( fillsize - 1 ))
+    done
+    print -n "$prompt_msg %*\n%B%(?.%F{blue}.%F{red})> %b%f"
+}
+
+right_prompt_cmd () {
+    prompt_msg=""
+    # Git branch
+    branch="$(git rev-parse --abbrev-ref HEAD 2> /dev/null)"
+    [[ -n $branch ]] && prompt_msg="%F{blue}(%F{yellow}$branch%F{blue})%f$prompt_msg"
+
+    # Git status
+    git_status="$(prompt_git_status)"
+    [[ -n $git_status ]] && prompt_msg="%F{blue}(%F{red}$git_status%F{blue})%f$prompt_msg"
+
+    # Git ahead/behind
+    git_ahead_behind="$(prompt_git_ahead_behind)"
+    [[ -n $git_ahead_behind ]] && prompt_msg="%F{blue}(%F{red}$git_ahead_behind%F{blue})%f$prompt_msg"
+
+    # Exec time
+    prompt_msg="%F{green}$(prompt_cmd_exec_time)%f $prompt_msg"
+
+    print -n $prompt_msg
+}
+
+async_prompt_setup () {
+    setopt prompt_subst
+
+    PROMPT='$(left_prompt_cmd)'
+    RPROMPT='$(right_prompt_cmd)'
+
+    ASYNC_PROC=0
+
+    prompt_precmd() {
+        async() {
+            # Save right prompt to tmp file
+            printf "%s" "$(right_prompt_cmd)" > "${HOME}/.zsh_tmp_prompt"
+            # Kill parent
+            kill -s USR1 $$
+        }
+
+        # Kill child if necessary
+        if [[ $ASYNC_PROC != 0 ]]; then
+            kill -s HUP $ASYNC_PROC 2>&1 >> /dev/null || :
+        fi
+
+        # Start background
+        async &!
+        ASYNC_PROC=$!
+
+        unset cmd_timestamp
+    }
+
+    TRAPUSR1() {
+        # Read from tmp file
+        RPROMPT="$(cat ${HOME}/.zsh_tmp_prompt)"
+        # Reset proc number
+        ASYNC_PROC=0
+        # Redisplay
+        zle && zle reset-prompt
+    }
+
+
+    add-zsh-hook precmd prompt_precmd
+}
+
+sync_prompt_setup () {
+    prompt_precmd() {
+        PROMPT="$(left_prompt_cmd)"
+        RPROMPT="$(right_prompt_cmd)"
+
+        unset cmd_timestamp
+    }
+
+    add-zsh-hook precmd prompt_precmd
+}
+
+prompt_preexec () {
+    cmd_timestamp=$EPOCHSECONDS
+}
+
+prompt_setup () {
+    if [[ $PROMPT_STYLE == "async" ]]; then
+        async_prompt_setup
     else
-        print -n "$BG[$ZSH_PROMPT_BG_B] "
+        sync_prompt_setup
     fi
 
-    print -n "$FG[$ZSH_PROMPT_FG_B]$(print %n) $sep_alt $(print %m) $FG[$ZSH_PROMPT_BG_B]$BG[$ZSH_PROMPT_BG_C]$sep "
-
-    print -n "$FG[$ZSH_PROMPT_FG_C]$(cwd_prompt)"
-
-    print -n "$FX[reset]$FG[$ZSH_PROMPT_BG_C]$sep$FX[reset] "
+    add-zsh-hook preexec prompt_preexec
 }
 
-right_prompt () {
-    local sep=""
-    local sep_alt=""
-
-    if [[ $last_exit_code -gt 0 ]]; then
-        print -n "$FG[$ZSH_PROMPT_BG_A]$sep$FG[$ZSH_PROMPT_FG_A]$BG[$ZSH_PROMPT_BG_A] $last_exit_code "
-    fi
-
-    local branch="$( { git symbolic-ref --quiet HEAD || git rev-parse --short HEAD; } 2>/dev/null )"
-    if [[ -n $branch ]]; then
-        print -n "$FG[$ZSH_PROMPT_BG_B]$sep$FG[$ZSH_PROMPT_FG_B]$BG[$ZSH_PROMPT_BG_B]  ${branch:t} "
-    fi
-
-    local ahead_behind="$(git_ahead_behind_prompt)"
-    if [[ -n $ahead_behind ]]; then
-        print -n "$sep_alt$ahead_behind "
-    fi
-
-    local gstat="$(git_status_prompt)"
-    if [[ -n $gstat ]]; then
-        print -n "$sep_alt$gstat "
-    fi
-
-    if [[ -n "$(git ls-files --others --exclude-standard 2>/dev/null)" ]]; then
-        print -n "$sep_alt + "
-    fi
-
-    local dt="$(date +'%I:%M')"
-    print -n "$FG[$ZSH_PROMPT_BG_C]$sep$FG[$ZSH_PROMPT_FG_C]$BG[$ZSH_PROMPT_BG_C] $dt "
-
-    print -n "$FX[reset]"
-}
-
-update_prompt () {
-    local last_exit_code="$?"
-    PROMPT="$(left_prompt)"
-    RPROMPT="$(right_prompt)"
-}
-
-if [[ ! ${precmd_functions[(r)update_prompt]} == update_prompt ]]; then
-    precmd_functions+=(update_prompt)
-fi
+prompt_setup

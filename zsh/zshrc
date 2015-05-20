@@ -1,5 +1,6 @@
 export DOTFILES_DIR=/repos/dotfiles
-export ZSH_THEME="ryan-base16"
+export ZSH_THEME="solarized"
+export PROMPT_STYLE="async"
 ##################
 # MISC ZSH OPTIONS
 ##################
@@ -31,7 +32,7 @@ path=(/usr/local/bin $path $HOME/bin /usr/local/share/npm/bin)
 # PYTHON VIRTUALENV
 ###################
 export WORKON_HOME=$HOME/.virtualenvs
-export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python
+export VIRTUALENVWRAPPER_PYTHON=/usr/local/bin/python
 export VIRTUAL_ENV_DISABLE_PROMPT=1
 source /usr/local/bin/virtualenvwrapper.sh
 
