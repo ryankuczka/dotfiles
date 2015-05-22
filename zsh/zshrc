@@ -71,6 +71,9 @@ HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND="bg=yellow,fg=black,bold"
 # Autoenv
 source $DOTFILES_DIR/zsh/autoenv/activate.sh
 
+# fzf
+[[ -f ~/.fzf.zsh ]] && source ~/.fzf.zsh
+
 #####################
 # BASIC ENV VARIABLES
 #####################
@@ -91,6 +94,7 @@ stty stop undef
 path=($path $HOME/.rvm/bin)
 fpath=($HOME/.rvm/scripts/zsh/Completion $fpath)
 [[ -s $HOME/.rvm/scripts/rvm ]] && source $HOME/.rvm/scripts/rvm
+
 ##########################
 # PLATFORM SPECIFIC CONFIG
 ##########################

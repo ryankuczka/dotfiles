@@ -20,6 +20,8 @@
     st = status -sb
     ctags = !.git/hooks/ctags
     vtag = !git tag -l | sort -n -t. -k1,1 -k2,2 -k3,3 -k4,4
+    subadd = "!f() { git subtree add --prefix $2 $1 master --squash; }; f"
+    subupd = "!f() { git subtree pull --prefix $2 $1 master --squash; }; f"
 
 [web]
     browser = open
