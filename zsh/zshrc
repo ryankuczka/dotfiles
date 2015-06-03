@@ -1,6 +1,6 @@
 export DOTFILES_DIR=/repos/dotfiles
 export ZSH_THEME="solarized"
-export PROMPT_STYLE="async"
+export PROMPT_STYLE="sync"
 ##################
 # MISC ZSH OPTIONS
 ##################

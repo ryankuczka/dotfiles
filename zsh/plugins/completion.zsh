@@ -22,3 +22,8 @@ cdpath=(.)
 # Use caching so that commands are usable
 zstyle ':completion::complete:*' use-cache 1
 zstyle ':completion::complete:*' cache-path $DOTFILES_DIR/cache/
+
+# Source some completion scripts
+_aws_zsh_completer_path=$(which aws_zsh_completer.sh)
+[[ -x $_aws_zsh_completer_path ]] && source $_aws_zsh_completer_path
+unset _aws_zsh_completer_path
