@@ -1,29 +1,86 @@
-### Setup
+# Setup
 
-1. Clone this repo
+## Clone The Repo
 
-    ```bash
-    cd ~
-    git clone git@github.com:ryankuczka/dotfiles.git
-    ```
+```bash
+# Make /repos directory
+sudo mkdir /repos
+sudo chown ryan:staff /repos
+cd /repos
 
-1. Symlink files from `~/dotfiles/filename` to `~/.filename`
+# Clone it!
+git clone git@github.com:ryankuczka/dotfiles.git
+```
 
-    ```bash
-    ./dotfiles/create_symlinks.sh
-    ```
+## Install Necessary Programs
+Install these programs first:
+- [slate](https://github.com/jigish/slate)
+- [homebrew](http://brew.sh/)
+- [USB Overdrive](http://www.usboverdrive.com/USBOverdrive/News.html)
 
-1. Install vim plugins
+Use homebrew to install:
 
-    ```bash
-    vim +PluginInstall +qall
-    ```
+```bash
+# Updated programs
+brew install python
+brew install python3
+brew install git
+brew install curl
 
-1. Compile a few vim plugins
+# New programs
+brew install tmux
+brew install reattach-to-user-namespace
+brew install tree
+brew install the_silver_searcher
+brew install wget
+brew install watch
+brew install youtube-dl
+brew install ctags
 
-    ```bash
-    cd ~/dotfiles/vim/bundle/YouCompleteMe
-    ./install.sh
-    cd ~/dotfiles/vim/bundle/ctrlp-cmatcher
-    env CFLAGS=-Qunused-arguments CPPFLAGS=-Qunused-arguments ./install.sh
-    ```
+# Vim/Neovim
+brew install vim
+brew install macvim
+brew tap neovim/homebrew-neovim
+brew install neovim --HEAD
+
+# Zsh
+brew install zsh
+# Then add /usr/local/bin/zsh to the end of /etc/shells and run:
+chsh -s /usr/local/bin/zsh
+```
+
+## Symlink Files
+
+```bash
+# Vim Stuff
+ln -sfv /repos/dotfiles/vim ~/.vim
+ln -sfv /repos/dotfiles/vim ~/.nvim
+ln -sfv /repos/dotfiles/vim/vimrc ~/.nvimrc
+
+# Git Stuff
+ln -sfv /repos/dotfiles/git/git_template ~/.git_template
+ln -sfv /repos/dotfiles/git/gitconfig ~/.gitconfig
+ln -sfv /repos/dotfiles/git/gitignore ~/.gitignore
+
+# Zsh Stuff
+ln -sfv /repos/dotfiles/zsh/fzf ~/.fzf
+ln -sfv /repos/dotfiles/zsh/zshrc ~/.zshrc
+
+# Miscellaneous
+ln -sfv /repos/dotfiles/misc/agignore ~/.agignore
+ln -sfv /repos/dotfiles/misc/slate.js ~/.slate.js
+ln -sfv /repos/dotfiles/tmux/tmux.conf ~/.tmux.conf
+```
+
+## Install Vim Plugins
+```bash
+vim +PlugInstall +qall
+
+# Compile YouCompleteMe
+cd ~/.vim/plugged/YouCompleteMe
+./install.sh
+
+# Compile CtrlP-Cmatcher
+cd ~/.vim/plugged/ctrlp-cmatcher
+env CFLAGS=-Qunused-arguments CPPFLAGS=-Qunused-arguments ./install.sh
+```
