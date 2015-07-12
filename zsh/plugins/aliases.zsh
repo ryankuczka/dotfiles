@@ -14,6 +14,15 @@ alias md='mkdir -p'
 # Show history with timestamps mm/dd/yyyy
 alias history='fc -fl 1'
 
+# Common head/tail/grep/etc shortcuts
+alias -g H='| head'
+alias -g T='| tail'
+alias -g G='| grep'
+alias -g L='| less'
+alias -g M='| more'
+alias -g NE='2> /dev/null'
+alias -g NUL='> /dev/null 2>&1'
+
 # Git
 alias g='git'
 compdef g=git

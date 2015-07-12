@@ -82,6 +82,7 @@ slate.bindAll({
     'i:space,ctrl': focusApp('iTerm2'),
     'space:space,ctrl': toggleMacvimIterm,
     'c:space,ctrl': focusApp('Google Chrome'),
+    's:space,ctrl': focusApp('Slack'),
     'f:space,ctrl': focusApp('Finder'),
     'g:space,ctrl': focusApp('Radiant Player'),
     'r:space,ctrl': slate.operation('relaunch'),

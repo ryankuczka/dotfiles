@@ -222,7 +222,10 @@ set timeout timeoutlen=1000 ttimeoutlen=10
 set visualbell t_vb=
 
 " Set terminal/mouse support
-set t_RV= ttymouse=xterm2
+set t_RV=
+if !has('nvim')
+  set ttymouse=xterm2
+endif
 set mouse=a
 
 " Sets GUI Font and options
