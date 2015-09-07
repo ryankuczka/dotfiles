@@ -51,12 +51,13 @@ Plug 'w0ng/vim-hybrid'
 Plug 'whatyouhide/vim-gotham'
 " Syntax Files {{{2
 Plug 'hdima/python-syntax'
-Plug 'pangloss/vim-javascript'
 Plug 'evanmiller/nginx-vim-syntax'
 Plug 'groenewege/vim-less'
 Plug 'hail2u/vim-css3-syntax'
 Plug 'othree/html5.vim'
+Plug 'othree/yajs.vim'
 Plug 'othree/javascript-libraries-syntax.vim'
+Plug 'gavocanov/vim-js-indent'
 Plug 'ingydotnet/yaml-vim'
 call plug#end() " }}}1
 
@@ -107,6 +108,7 @@ let g:syntastic_python_flake8_args='--ignore=E501,E128,E261,E262'
 let g:syntastic_javascript_checkers=["jshint"]
 let g:syntastic_javascript_jshint_args='--config /sites/ycharts/confs/developers/jshint_conf.json'
 let g:syntastic_sh_checkers=["shellcheck"]
+let g:syntastic_json_checkers=["jsonlint"]
 
 " CtrlP {{{2
 let g:ctrlp_working_path_mode='wra'
