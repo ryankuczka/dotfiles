@@ -46,6 +46,19 @@ _managepy_migrate() {
     _managepy_apps
 }
 
+_managepy_makemigrations() {
+    local arguments
+    arguments=(
+        $nul_args
+        "--dry-run[Just show what migrations would be made; don't actually write them.]"
+        '--merge[Enable fixing of migration conflicts.]'
+        '--empty[Create an empty migration.]'
+        '--noinput[Tells Django to NOT prompt the user for input of any kind.]'
+    )
+    _arguments -s $arguments && ret=0
+    _managepy_apps
+}
+
 _managepy() {
     local curcontext=$curcontext ret=1
 
