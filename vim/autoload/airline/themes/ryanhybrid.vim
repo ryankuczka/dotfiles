@@ -4,12 +4,12 @@
 let g:airline#themes#ryanhybrid#palette = {}
 
 function! airline#themes#ryanhybrid#refresh()
-    let s:N1 = airline#themes#get_highlight('DiffAdd')
-    let s:N2 = airline#themes#get_highlight('PMenuThumb')
+    let s:N1 = airline#themes#get_highlight2(['Search', 'fg'], ['DiffAdd', 'bg'])
+    let s:N2 = airline#themes#get_highlight('PMenuSel')
     let s:N3 = airline#themes#get_highlight('CursorLine')
     let g:airline#themes#ryanhybrid#palette.normal = airline#themes#generate_color_map(s:N1, s:N2, s:N3)
 
-    let modified_group = airline#themes#get_highlight2(['Constant', 'fg'], ['CursorLine', 'bg'])
+    let modified_group = airline#themes#get_highlight2(['Search', 'bg'], ['CursorLine', 'bg'])
     let g:airline#themes#ryanhybrid#palette.normal_modified = {
                 \ 'airline_c': modified_group
                 \ }
@@ -18,7 +18,7 @@ function! airline#themes#ryanhybrid#refresh()
     let g:airline#themes#ryanhybrid#palette.normal.airline_warning = warning_group
     let g:airline#themes#ryanhybrid#palette.normal_modified.airline_warning = warning_group
 
-    let s:I1 = airline#themes#get_highlight2(['Search', 'fg'], ['Normal', 'fg'])
+    let s:I1 = airline#themes#get_highlight('Search')
     let s:I2 = s:N2  " airline#themes#get_highlight2(['Text', 'fg'], ['SpellLocal', 'bg'], 'bold')
     let s:I3 = s:N3  " airline#themes#get_highlight2(['Text', 'fg'], ['SpellCap', 'bg'], 'bold')
     let g:airline#themes#ryanhybrid#palette.insert = airline#themes#generate_color_map(s:I1, s:I2, s:I3)
@@ -26,7 +26,7 @@ function! airline#themes#ryanhybrid#refresh()
     let g:airline#themes#ryanhybrid#palette.insert.airline_warning = g:airline#themes#ryanhybrid#palette.normal.airline_warning
     let g:airline#themes#ryanhybrid#palette.insert_modified.airline_warning = g:airline#themes#ryanhybrid#palette.normal_modified.airline_warning
 
-    let s:R1 = airline#themes#get_highlight('DiffChange')
+    let s:R1 = airline#themes#get_highlight2(['Search', 'fg'], ['DiffChange', 'bg'])
     let s:R2 = s:N2
     let s:R3 = s:N3
     let g:airline#themes#ryanhybrid#palette.replace = airline#themes#generate_color_map(s:R1, s:R2, s:R3)
