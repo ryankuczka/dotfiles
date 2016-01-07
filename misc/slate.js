@@ -1,6 +1,7 @@
 // GLOBAL CONFIGS
 slate.configAll({
-    'defaultToCurrentScreen': true
+    defaultToCurrentScreen: true
+    // orderScreensLeftToRight: true
 });
 
 // WINDOW RESIZING
@@ -64,19 +65,6 @@ var toggleMacvimIterm = function(winObj) {
     }
 };
 
-var switchItermWins = function(winObj) {
-    if (winObj && winObj.app().name() === 'iTerm2') {
-        if (winObj.screen().id() === 2) {
-            slate.operation('focus', {'direction': 'left'}).run();
-        } else {
-            slate.operation('focus', {'direction': 'right'}).run();
-        }
-    } else {
-        focusApp('iTerm2').run();
-    }
-};
-
-
 slate.bindAll({
     'm:space,ctrl': focusApp('MacVim'),
     'i:space,ctrl': focusApp('iTerm2'),
@@ -87,4 +75,51 @@ slate.bindAll({
     'g:space,ctrl': focusApp('Radiant Player'),
     'r:space,ctrl': slate.operation('relaunch'),
     'h:space,ctrl': slate.operation('hint', {'characters': 'asdfghjkl'})
+});
+
+// LAYOUTS
+var leftScreen = '0',
+    rightScreen = '1';
+var leftFull = slate.operation('move', {
+    screen: leftScreen,
+    x: 'screenOriginX',
+    y: 'screenOriginY',
+    width: 'screenSizeX',
+    height: 'screenSizeY'
+});
+var rightRightHalf = slate.operation('push', {
+    screen: rightScreen,
+    direction: 'right',
+    style: 'bar-resize:screenSizeX/2'
+});
+var rightLeftHalf = slate.operation('push', {
+    screen: rightScreen,
+    direction: 'left',
+    style: 'bar-resize:screenSizeX/2'
+});
+
+var twoMonWork = slate.layout('twoMonWork', {
+    '_after_': {operations: [focusApp('iTerm2')]},
+    MacVim: {operations: [leftFull]},
+    iTerm2: {operations: [rightRightHalf]},
+    'Google Chrome': {
+        operations: [rightLeftHalf],
+        repeat: true
+    },
+    Slack: {operations: [rightLeftHalf]},
+    'Radiant Player': {operations: [rightLeftHalf]}
+});
+
+var laptopOnly = slate.layout('laptopOnly', {
+    '_after_': {operations: [focusApp('Google Chrome')]},
+    MacVim: {operations: [fullScreen]},
+    iTerm2: {operations: [fullScreen]},
+    'Google Chrome': {operations: [fullScreen], repeat: true},
+    Slack: {operations: [fullScreen]},
+    'Radiant Player': {operations: [fullScreen]}
+});
+
+slate.bindAll({
+    '1:space,ctrl': slate.operation('layout', {name: 'twoMonWork'}),
+    '2:space,ctrl': slate.operation('layout', {name: 'laptopOnly'})
 });

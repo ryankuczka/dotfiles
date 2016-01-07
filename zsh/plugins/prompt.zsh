@@ -81,7 +81,7 @@ prompt_virtual_env () {
 left_prompt_cmd () {
     local zero='%([BSUbfksu]|([FB]|){*})'
 
-    prompt_msg="$(prompt_virtual_env)$(prompt_cwd) "
+    prompt_msg="\n$(prompt_virtual_env)%F{green}%n@%m%f $(prompt_cwd) "
 
     prompt_msg_len=${#${(S%%)prompt_msg//$~zero/}}
     local fillsize=$(( COLUMNS - prompt_msg_len - 10 ))

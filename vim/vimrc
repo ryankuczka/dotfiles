@@ -10,6 +10,7 @@ filetype plugin indent on
 call plug#begin()
 Plug '/repos/vim-pyfold'
 Plug 'tpope/vim-fugitive'
+Plug 'tpope/vim-rhubarb'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-abolish'
 Plug 'tpope/vim-unimpaired'
@@ -36,8 +37,8 @@ Plug 'haya14busa/incsearch.vim'
 Plug 'jlanzarotta/bufexplorer'
 Plug 'guns/xterm-color-table.vim'
 Plug 'ap/vim-css-color'
-Plug 'gregsexton/MatchTag', { 'for': ['html', 'xml', 'htmldjango'] }
 Plug 'Konfekt/FastFold'
+Plug 'PeterRincker/vim-argumentative'
 if exists('$TMUX')
   Plug 'christoomey/vim-tmux-navigator'
   Plug 'tmux-plugins/vim-tmux-focus-events'
@@ -59,6 +60,7 @@ Plug 'othree/yajs.vim'
 Plug 'othree/javascript-libraries-syntax.vim'
 Plug 'gavocanov/vim-js-indent'
 Plug 'ingydotnet/yaml-vim'
+Plug 'octol/vim-cpp-enhanced-highlight'
 call plug#end() " }}}1
 
 let mapleader = ','
@@ -165,6 +167,15 @@ nnoremap <silent> <Leader>d :NERDTreeToggle<CR>
 nnoremap <silent> <Leader>l :NERDTreeFind<CR>
 let NERDTreeRespectWildIgnore = 1
 
+" Argumentative {{{2
+let g:argumentative_no_mappings = 1
+nmap [, <Plug>Argumentative_Prev
+nmap ], <Plug>Argumentative_Next
+xmap [, <Plug>Argumentative_XPrev
+xmap ], <Plug>Argumentative_XNext
+nmap <, <Plug>Argumentative_MoveLeft
+nmap >, <Plug>Argumentative_MoveRight
+
 " Python Syntax {{{2
 let g:python_version_2 = 1
 let g:python_highlight_all = 1
@@ -255,8 +266,10 @@ set shiftround     " force indentation to multiple of shiftwidth
 
 if has('linebreak')
   set linebreak      " break wrapped lines at normal characters instead of last
-  set breakindent    " make wrapped lines have same indentation
   let &showbreak = '↪ ' " start wrapped lines with this char
+  if has('breakindent')
+    set breakindent    " make wrapped lines have same indentation
+  endif
 endif
 " Command Line {{{2
 set wildmode=longest,list,full " specifies that pressing <Tab> will complete to longest common substring, then a list of options, then cycle through all options
