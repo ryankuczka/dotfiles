@@ -1,6 +1,6 @@
 export DOTFILES_DIR=/repos/dotfiles
 export ZSH_THEME="solarized"
-export PROMPT_STYLE="sync"
+export PROMPT_STYLE="async"
 ##################
 # MISC ZSH OPTIONS
 ##################
@@ -28,6 +28,22 @@ fpath=($DOTFILES_DIR/zsh/functions $DOTFILES_DIR/zsh/completions $fpath)
 typeset -Ug path
 path=(/usr/local/bin $path $HOME/bin /usr/local/share/npm/bin)
 
+#####################
+# BASIC ENV VARIABLES
+#####################
+# Don't edit default merge commit messages
+export GIT_MERGE_AUTOEDIT=no
+# Set editor to gvim
+export EDITOR="/usr/local/bin/vim -f"
+export PAGER="less"
+export LESS="-RXE"
+export CLICOLOR=1
+export LC_CTYPE=$LANG
+
+# Allow use of ^S and ^Q in vim
+stty -ixon -ixoff
+stty stop undef
+
 ###################
 # PYTHON VIRTUALENV
 ###################
@@ -39,6 +55,9 @@ source /usr/local/bin/virtualenvwrapper.sh
 #############
 # ZSH PLUGINS
 #############
+# Local zshrc
+[[ -s $HOME/.zshrc.local ]] && source "$HOME/.zshrc.local"
+
 # Themes
 if [[ -n $ZSH_THEME ]] && [[ -f $DOTFILES_DIR/zsh/themes/${ZSH_THEME}.zsh-theme ]]; then
     source $DOTFILES_DIR/zsh/themes/${ZSH_THEME}.zsh-theme
@@ -72,23 +91,7 @@ HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND="bg=yellow,fg=black,bold"
 source $DOTFILES_DIR/zsh/autoenv/activate.sh
 
 # fzf
-[[ -f ~/.fzf.zsh ]] && source ~/.fzf.zsh
-
-#####################
-# BASIC ENV VARIABLES
-#####################
-# Don't edit default merge commit messages
-export GIT_MERGE_AUTOEDIT=no
-# Set editor to gvim
-export EDITOR="/usr/local/bin/vim -f"
-export PAGER="less"
-export LESS="-RXE"
-export CLICOLOR=1
-export LC_CTYPE=$LANG
-
-# Allow use of ^S and ^Q in vim
-stty -ixon -ixoff
-stty stop undef
+[[ -s ~/.fzf.zsh ]] && source ~/.fzf.zsh
 
 # RVM
 path=($path $HOME/.rvm/bin)

@@ -71,8 +71,8 @@ let maplocalleader = ','
 " Fugitive {{{2
 nnoremap <Leader>gs <C-W>o:Gstatus<CR>
 " open the current file on github
-nnoremap <Leader>gb :.Gbrowse@ryan<CR>
-vnoremap <Leader>gb :Gbrowse@ryan<CR>
+nnoremap <Leader>gb :.Gbrowse<CR>
+vnoremap <Leader>gb :Gbrowse<CR>
 
 " CommandCaps {{{2
 let g:commandcaps_override = 1
