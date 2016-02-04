@@ -7,3 +7,5 @@ tags
 node_modules/*
 .agignore
 *.egg-info
+.tern-project
+migrate.py
