@@ -92,5 +92,4 @@ alias wiki='web_search duckduckgo \!w'
 alias youtube='web_search duckduckgo \!yt'
 
 # Misc
-alias nw="/Applications/node-webkit.app/Contents/MacOS/node-webkit"
 alias tree="tree -I '*.pyc|*.un~|*.sw[op]|*node_modules*|%*|.DS_Store|.git' -Ca"

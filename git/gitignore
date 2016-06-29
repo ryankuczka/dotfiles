@@ -9,3 +9,4 @@ node_modules/*
 *.egg-info
 .tern-project
 migrate.py
+*.vim-rplugin~

@@ -1,5 +1,4 @@
 export DOTFILES_DIR=/repos/dotfiles
-export ZSH_THEME="solarized"
 export PROMPT_STYLE="async"
 ##################
 # MISC ZSH OPTIONS
@@ -34,7 +33,7 @@ path=(/usr/local/bin $path $HOME/bin /usr/local/share/npm/bin)
 # Don't edit default merge commit messages
 export GIT_MERGE_AUTOEDIT=no
 # Set editor to gvim
-export EDITOR="/usr/local/bin/vim -f"
+export EDITOR="/usr/local/bin/nvim"
 export PAGER="less"
 export LESS="-RXE"
 export CLICOLOR=1
@@ -57,11 +56,6 @@ source /usr/local/bin/virtualenvwrapper.sh
 #############
 # Local zshrc
 [[ -s $HOME/.zshrc.local ]] && source "$HOME/.zshrc.local"
-
-# Themes
-if [[ -n $ZSH_THEME ]] && [[ -f $DOTFILES_DIR/zsh/themes/${ZSH_THEME}.zsh-theme ]]; then
-    source $DOTFILES_DIR/zsh/themes/${ZSH_THEME}.zsh-theme
-fi
 
 # Set up compinit
 autoload -U compinit
@@ -97,6 +91,9 @@ source $DOTFILES_DIR/zsh/autoenv/activate.sh
 path=($path $HOME/.rvm/bin)
 fpath=($HOME/.rvm/scripts/zsh/Completion $fpath)
 [[ -s $HOME/.rvm/scripts/rvm ]] && source $HOME/.rvm/scripts/rvm
+
+# Thefuck
+which thefuck > /dev/null && eval $(thefuck --alias)
 
 ##########################
 # PLATFORM SPECIFIC CONFIG

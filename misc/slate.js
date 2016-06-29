@@ -58,10 +58,11 @@ var focusApp = function(app) {
 };
 
 var toggleMacvimIterm = function(winObj) {
-    if (winObj && winObj.app().name() === 'MacVim') {
-        focusApp('iTerm2').run();
-    } else {
+    slate.log(winObj.title());
+    if (winObj && winObj.app().name() === 'iTerm2') {
         focusApp('MacVim').run();
+    } else {
+        focusApp('iTerm2').run();
     }
 };
 
@@ -101,7 +102,12 @@ var rightLeftHalf = slate.operation('push', {
 var twoMonWork = slate.layout('twoMonWork', {
     '_after_': {operations: [focusApp('iTerm2')]},
     MacVim: {operations: [leftFull]},
-    iTerm2: {operations: [rightRightHalf]},
+    iTerm2: {
+        operations: [leftFull, rightRightHalf],
+        'title-order-regex': ["^.*nvim.*$"],
+        repeat: true,
+        ignoreFail: true
+    },
     'Google Chrome': {
         operations: [rightLeftHalf],
         repeat: true
@@ -113,7 +119,7 @@ var twoMonWork = slate.layout('twoMonWork', {
 var laptopOnly = slate.layout('laptopOnly', {
     '_after_': {operations: [focusApp('Google Chrome')]},
     MacVim: {operations: [fullScreen]},
-    iTerm2: {operations: [fullScreen]},
+    iTerm2: {operations: [fullScreen], repeat: true},
     'Google Chrome': {operations: [fullScreen], repeat: true},
     Slack: {operations: [fullScreen]},
     'Radiant Player': {operations: [fullScreen]}

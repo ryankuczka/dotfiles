@@ -59,6 +59,17 @@ _managepy_makemigrations() {
     _managepy_apps
 }
 
+_managepy_sqlmigrate() {
+    local arguments
+    arguments=(
+        $nul_args
+        '--database[Nominates a data to synchronize. Defaults to the "default" database.]'
+        '--backwards[Creates SQL to unapply the migration, rather than to apply it]'
+    )
+    _arguments -s $arguments && ret=0
+    _managepy_apps
+}
+
 _managepy() {
     local curcontext=$curcontext ret=1
 

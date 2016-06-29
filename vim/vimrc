@@ -20,13 +20,11 @@ Plug 'tpope/vim-vinegar'
 Plug 'tpope/vim-eunuch'
 Plug 'tpope/vim-characterize'
 Plug 'takac/vim-commandcaps'
-Plug 'bling/vim-airline'
-Plug 'Valloric/YouCompleteMe'
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
 Plug 'mbbill/undotree', { 'on': 'UndotreeToggle' }
 Plug 'Yggdroot/indentLine'
 Plug 'suan/vim-instant-markdown', { 'for': 'markdown' }
-Plug 'scrooloose/syntastic'
-Plug 'scrooloose/nerdtree'
 Plug 'majutsushi/tagbar'
 Plug 'ctrlpvim/ctrlp.vim'
 Plug 'JazzCore/ctrlp-cmatcher'
@@ -43,6 +41,14 @@ if exists('$TMUX')
   Plug 'christoomey/vim-tmux-navigator'
   Plug 'tmux-plugins/vim-tmux-focus-events'
   Plug 'tmux-plugins/vim-tmux'
+endif
+if has('nvim')
+  Plug 'benekastah/neomake'
+  Plug 'Shougo/deoplete.nvim'
+  Plug 'zchee/deoplete-jedi'
+else
+  Plug 'scrooloose/syntastic'
+  Plug 'Valloric/YouCompleteMe'
 endif
 " Color Schemes {{{2
 Plug 'jonathanfilip/vim-lucius'
@@ -68,6 +74,62 @@ let maplocalleader = ','
 
 " Configure Plugins: {{{1
 " ==================
+" Nvim Specific
+if has('nvim')
+  " Neomake {{{2
+  nnoremap <C-S> :Neomake<CR>
+  let g:neomake_open_list = 2
+  let g:neomake_python_flake8_maker = {
+    \ 'args': ['--ignore', 'E501,E128,E261,E262,E402']
+    \ }
+  let g:neomake_python_enabled_makers = ['flake8']
+  let g:neomake_javascript_jshint_maker = {
+    \ 'args': ['--config', '/sites/ycharts/confs/developers/jshint_conf.json'],
+    \ 'errorformat': '%f: line %l\, col %v\, %m',
+    \ }
+  let g:neomake_javascript_enabled_makers = ['jshint']
+  let g:neomake_error_sign = {
+    \ 'text': '✖',
+    \ 'texthl': 'ErrorMsg',
+    \ }
+  let g:neomake_warning_sign = {
+    \ 'text': '⚠',
+    \ 'texthl': 'WarningMsg',
+    \ }
+
+  " Deoplete {{{2
+  let g:deoplete#enable_at_startup = 1
+
+  let g:deoplete#sources#jedi#show_docstring = 1
+
+  inoremap <silent><expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
+  inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+  inoremap <expr> <C-h> deoplete#mappings#smart_close_popup()."\<C-h>"
+  inoremap <expr> <BS> deoplete#mappings#smart_close_popup()."\<C-h>"
+  " }}}2
+
+" Vim Specific
+else
+  " Syntastic {{{2
+  nnoremap <C-S> :SyntasticCheck<CR>
+  let g:syntastic_mode_map = {'mode': 'passive'}
+  let g:syntastic_auto_loc_list=1
+  let g:syntastic_check_on_open=1
+  let g:syntastic_python_checkers=["flake8"]
+  let g:syntastic_python_flake8_args='--ignore=E501,E128,E261,E262,E731'
+  let g:syntastic_javascript_checkers=["jshint"]
+  let g:syntastic_javascript_jshint_args='--config /sites/ycharts/confs/developers/jshint_conf.json'
+  let g:syntastic_sh_checkers=["shellcheck"]
+  let g:syntastic_json_checkers=["jsonlint"]
+
+  " YouCompleteMe {{{2
+  let g:ycm_complete_in_comments = 1
+  let g:ycm_collect_identifiers_from_tags_files = 1
+  let g:ycm_collect_identifiers_from_comments_and_strings = 1
+  " }}}2
+endif
+
+" General Plugins
 " Fugitive {{{2
 nnoremap <Leader>gs <C-W>o:Gstatus<CR>
 " open the current file on github
@@ -77,18 +139,14 @@ vnoremap <Leader>gb :Gbrowse<CR>
 " CommandCaps {{{2
 let g:commandcaps_override = 1
 
-" YouCompleteMe {{{2
-let g:ycm_complete_in_comments = 1
-let g:ycm_collect_identifiers_from_tags_files = 1
-let g:ycm_collect_identifiers_from_comments_and_strings = 1
-
 " Airline {{{2
 let g:airline_powerline_fonts=1
-let g:airline_theme='ryansolarized'
+let g:airline_theme='lucius'
 let g:airline#extensions#hunks#non_zero_only = 1
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#show_buffers = 0
 let g:airline#extensions#tabline#fnamemod = ':t'
+let g:airline#extensions#tabline#tab_nr_type = 1
 
 " Undotree {{{2
 nnoremap <Leader>u :UndotreeToggle<CR>
@@ -99,18 +157,6 @@ let g:indentLine_setColors = 0
 
 " Instant Markdown {{{2
 let g:instant_markdown_slow = 1
-
-" Syntastic {{{2
-nnoremap <C-S> :SyntasticCheck<CR>
-let g:syntastic_mode_map = {'mode': 'passive'}
-let g:syntastic_auto_loc_list=1
-let g:syntastic_check_on_open=1
-let g:syntastic_python_checkers=["flake8"]
-let g:syntastic_python_flake8_args='--ignore=E501,E128,E261,E262'
-let g:syntastic_javascript_checkers=["jshint"]
-let g:syntastic_javascript_jshint_args='--config /sites/ycharts/confs/developers/jshint_conf.json'
-let g:syntastic_sh_checkers=["shellcheck"]
-let g:syntastic_json_checkers=["jsonlint"]
 
 " CtrlP {{{2
 let g:ctrlp_working_path_mode='wra'
@@ -160,6 +206,7 @@ nnoremap <silent> <Leader>b :BufExplorerHorizontalSplit<CR>
 
 " TagBar {{{2
 let g:tagbar_left = 1
+let g:tagbar_autofocus = 1
 nnoremap <silent> <Leader>o :TagbarToggle<CR>
 
 " NERDTree {{{2
@@ -177,7 +224,6 @@ nmap <, <Plug>Argumentative_MoveLeft
 nmap >, <Plug>Argumentative_MoveRight
 
 " Python Syntax {{{2
-let g:python_version_2 = 1
 let g:python_highlight_all = 1
 let g:python_highlight_space_errors = 0
 
@@ -185,14 +231,22 @@ let g:python_highlight_space_errors = 0
 let g:javascript_ignore_javaScriptdoc = 1
 let g:used_javascript_libs = 'angularjs,underscore'
 
+" Miscellaneous Functions And Commands:
+" =====================================
+
+
 " Standard Options: {{{1
 " =================
 " Syntax Highlighting {{{2
 syntax on
 
-set t_Co=256       " sets the number of colors to 256
+" Lucius Settings {{{3
+let g:lucius_style = 'dark'
+let g:lucius_contrast = 'low'
+" }}}3
+
 set background=dark
-colorscheme solarized
+colorscheme lucius
 
 if g:colors_name == 'solarized'
   hi Folded cterm=bold gui=bold
@@ -325,6 +379,10 @@ if has('nvim')
 
   " Insert mode when entering terminals
   au WinEnter term://* call feedkeys('i')
+
+  " Python paths
+  let g:python_host_prog = expand('~/.virtualenvs/neovim2/bin/python')
+  let g:python3_host_prog = expand('~/.virtualenvs/neovim/bin/python')
 endif
 
 " Useful Mappings: {{{1
@@ -343,6 +401,12 @@ nnoremap <C-H> <C-W>h
 nnoremap <C-J> <C-W>j
 nnoremap <C-K> <C-W>k
 nnoremap <C-L> <C-W>l
+if has('nvim')
+  tnoremap <C-H> <C-\><C-N><C-W>h
+  tnoremap <C-J> <C-\><C-N><C-W>j
+  tnoremap <C-K> <C-\><C-N><C-W>k
+  tnoremap <C-L> <C-\><C-N><C-W>l
+endif
 
 " Shortcuts {{{2
 " Maps Y to y$ to work like D and C
@@ -385,8 +449,6 @@ augroup FileTypeConfs
   autocmd BufRead,BufNewFile *requirements*.txt set filetype=config
 augroup END " }}}1
 
-" Miscellaneous Functions And Commands:
-" =====================================
 " Debug Statements: {{{1
 " =================
 " Insert debugger/ipdb statement
@@ -479,14 +541,14 @@ function! Ag(...)
 endfunction
 command! -nargs=* Ag call Ag(<f-args>)
 
-" NewTab: {{{1
-function! NewTab(dir)
+" TabNew: {{{1
+function! TabNew(dir)
   tabnew
   if a:dir != ''
     execute 'lcd '.a:dir
   endif
 endfunction
-command! -complete=dir -nargs=1 NewTab call NewTab(<q-args>)
+command! -complete=dir -nargs=1 TabNew call TabNew(<q-args>)
 " }}}1
 
 " try to source local vimrc
