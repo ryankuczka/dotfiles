@@ -8,17 +8,19 @@ import (
 
 const (
 	// Current version
-	Version = "0.9.11"
+	version = "0.13.5"
 
 	// Core
 	coordinatorDelayMax  time.Duration = 100 * time.Millisecond
 	coordinatorDelayStep time.Duration = 10 * time.Millisecond
 
 	// Reader
-	defaultCommand = `find * -path '*/\.*' -prune -o -type f -print -o -type l -print 2> /dev/null`
+	defaultCommand   = `find . -path '*/\.*' -prune -o -type f -print -o -type l -print 2> /dev/null | sed s/^..//`
+	readerBufferSize = 64 * 1024
 
 	// Terminal
-	initialDelay    = 100 * time.Millisecond
+	initialDelay    = 20 * time.Millisecond
+	initialDelayTac = 100 * time.Millisecond
 	spinnerDuration = 200 * time.Millisecond
 
 	// Matcher
@@ -32,6 +34,12 @@ const (
 
 	// Not to cache mergers with large lists
 	mergerCacheMax int = 100000
+
+	// History
+	defaultHistoryMax int = 1000
+
+	// Jump labels
+	defaultJumpLabels string = "asdfghjklqwertyuiopzxcvbnm1234567890ASDFGHJKLQWERTYUIOPZXCVBNM`~;:,<.>/?'\"!@#$%^&*()[{]}-_=+"
 )
 
 // fzf events
@@ -41,5 +49,13 @@ const (
 	EvtSearchNew
 	EvtSearchProgress
 	EvtSearchFin
+	EvtHeader
 	EvtClose
+)
+
+const (
+	exitOk        = 0
+	exitNoMatch   = 1
+	exitError     = 2
+	exitInterrupt = 130
 )

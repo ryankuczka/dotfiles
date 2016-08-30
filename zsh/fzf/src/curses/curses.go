@@ -3,18 +3,21 @@ package curses
 /*
 #include <ncurses.h>
 #include <locale.h>
-#cgo LDFLAGS: -lncurses
-void swapOutput() {
-  FILE* temp = stdout;
-  stdout = stderr;
-  stderr = temp;
+#cgo !static LDFLAGS: -lncurses
+#cgo static LDFLAGS: -l:libncursesw.a -l:libtinfo.a -l:libgpm.a -ldl
+#cgo android static LDFLAGS: -l:libncurses.a -fPIE -march=armv7-a -mfpu=neon -mhard-float -Wl,--no-warn-mismatch
+
+SCREEN *c_newterm () {
+	return newterm(NULL, stderr, stdin);
 }
+
 */
 import "C"
 
 import (
+	"fmt"
 	"os"
-	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 	"unicode/utf8"
@@ -54,18 +57,39 @@ const (
 
 	Invalid
 	Mouse
+	DoubleClick
 
 	BTab
+	BSpace
 
 	Del
 	PgUp
 	PgDn
 
+	Up
+	Down
+	Left
+	Right
+	Home
+	End
+
+	SLeft
+	SRight
+
 	F1
 	F2
 	F3
 	F4
+	F5
+	F6
+	F7
+	F8
+	F9
+	F10
 
+	AltEnter
+	AltSpace
+	AltSlash
 	AltBS
 	AltA
 	AltB
@@ -88,23 +112,32 @@ const (
 	ColInfo
 	ColCursor
 	ColSelected
-	ColUser
+	ColHeader
+	ColBorder
+	ColUser // Should be the last entry
 )
 
 const (
 	doubleClickDuration = 500 * time.Millisecond
+	colDefault          = -1
+	colUndefined        = -2
 )
 
 type ColorTheme struct {
-	darkBg       C.short
-	prompt       C.short
-	match        C.short
-	current      C.short
-	currentMatch C.short
-	spinner      C.short
-	info         C.short
-	cursor       C.short
-	selected     C.short
+	UseDefault   bool
+	Fg           int16
+	Bg           int16
+	DarkBg       int16
+	Prompt       int16
+	Match        int16
+	Current      int16
+	CurrentMatch int16
+	Spinner      int16
+	Info         int16
+	Cursor       int16
+	Selected     int16
+	Header       int16
+	Border       int16
 }
 
 type Event struct {
@@ -129,46 +162,108 @@ var (
 	_colorMap     map[int]int
 	_prevDownTime time.Time
 	_clickY       []int
+	_screen       *C.SCREEN
 	Default16     *ColorTheme
 	Dark256       *ColorTheme
 	Light256      *ColorTheme
-	DarkBG        C.short
+	FG            int
+	CurrentFG     int
+	BG            int
+	DarkBG        int
 )
+
+type Window struct {
+	win    *C.WINDOW
+	Top    int
+	Left   int
+	Width  int
+	Height int
+}
+
+func NewWindow(top int, left int, width int, height int, border bool) *Window {
+	win := C.newwin(C.int(height), C.int(width), C.int(top), C.int(left))
+	if border {
+		attr := _color(ColBorder, false)
+		C.wattron(win, attr)
+		C.box(win, 0, 0)
+		C.wattroff(win, attr)
+	}
+	return &Window{
+		win:    win,
+		Top:    top,
+		Left:   left,
+		Width:  width,
+		Height: height,
+	}
+}
+
+func EmptyTheme() *ColorTheme {
+	return &ColorTheme{
+		UseDefault:   true,
+		Fg:           colUndefined,
+		Bg:           colUndefined,
+		DarkBg:       colUndefined,
+		Prompt:       colUndefined,
+		Match:        colUndefined,
+		Current:      colUndefined,
+		CurrentMatch: colUndefined,
+		Spinner:      colUndefined,
+		Info:         colUndefined,
+		Cursor:       colUndefined,
+		Selected:     colUndefined,
+		Header:       colUndefined,
+		Border:       colUndefined}
+}
 
 func init() {
 	_prevDownTime = time.Unix(0, 0)
 	_clickY = []int{}
 	_colorMap = make(map[int]int)
 	Default16 = &ColorTheme{
-		darkBg:       C.COLOR_BLACK,
-		prompt:       C.COLOR_BLUE,
-		match:        C.COLOR_GREEN,
-		current:      C.COLOR_YELLOW,
-		currentMatch: C.COLOR_GREEN,
-		spinner:      C.COLOR_GREEN,
-		info:         C.COLOR_WHITE,
-		cursor:       C.COLOR_RED,
-		selected:     C.COLOR_MAGENTA}
+		UseDefault:   true,
+		Fg:           15,
+		Bg:           0,
+		DarkBg:       C.COLOR_BLACK,
+		Prompt:       C.COLOR_BLUE,
+		Match:        C.COLOR_GREEN,
+		Current:      C.COLOR_YELLOW,
+		CurrentMatch: C.COLOR_GREEN,
+		Spinner:      C.COLOR_GREEN,
+		Info:         C.COLOR_WHITE,
+		Cursor:       C.COLOR_RED,
+		Selected:     C.COLOR_MAGENTA,
+		Header:       C.COLOR_CYAN,
+		Border:       C.COLOR_BLACK}
 	Dark256 = &ColorTheme{
-		darkBg:       236,
-		prompt:       110,
-		match:        108,
-		current:      254,
-		currentMatch: 151,
-		spinner:      148,
-		info:         144,
-		cursor:       161,
-		selected:     168}
+		UseDefault:   true,
+		Fg:           15,
+		Bg:           0,
+		DarkBg:       236,
+		Prompt:       110,
+		Match:        108,
+		Current:      254,
+		CurrentMatch: 151,
+		Spinner:      148,
+		Info:         144,
+		Cursor:       161,
+		Selected:     168,
+		Header:       109,
+		Border:       59}
 	Light256 = &ColorTheme{
-		darkBg:       251,
-		prompt:       25,
-		match:        66,
-		current:      237,
-		currentMatch: 23,
-		spinner:      65,
-		info:         101,
-		cursor:       161,
-		selected:     168}
+		UseDefault:   true,
+		Fg:           15,
+		Bg:           0,
+		DarkBg:       251,
+		Prompt:       25,
+		Match:        66,
+		Current:      237,
+		CurrentMatch: 23,
+		Spinner:      65,
+		Info:         101,
+		Cursor:       161,
+		Selected:     168,
+		Header:       31,
+		Border:       145}
 }
 
 func attrColored(pair int, bold bool) C.int {
@@ -229,57 +324,79 @@ func Init(theme *ColorTheme, black bool, mouse bool) {
 		// syscall.Dup2(int(in.Fd()), int(os.Stdin.Fd()))
 	}
 
-	C.swapOutput()
-
 	C.setlocale(C.LC_ALL, C.CString(""))
-	C.initscr()
+	_screen = C.c_newterm()
+	if _screen == nil {
+		fmt.Println("Invalid $TERM: " + os.Getenv("TERM"))
+		os.Exit(2)
+	}
+	C.set_term(_screen)
 	if mouse {
 		C.mousemask(C.ALL_MOUSE_EVENTS, nil)
 	}
-	C.cbreak()
 	C.noecho()
 	C.raw() // stty dsusp undef
 
-	intChan := make(chan os.Signal, 1)
-	signal.Notify(intChan, os.Interrupt, os.Kill)
-	go func() {
-		<-intChan
-		Close()
-		os.Exit(1)
-	}()
-
 	if theme != nil {
 		C.start_color()
-		initPairs(theme, black)
+		var baseTheme *ColorTheme
+		if C.tigetnum(C.CString("colors")) >= 256 {
+			baseTheme = Dark256
+		} else {
+			baseTheme = Default16
+		}
+		initPairs(baseTheme, theme, black)
 		_color = attrColored
 	} else {
 		_color = attrMono
 	}
 }
 
-func initPairs(theme *ColorTheme, black bool) {
-	var bg C.short
+func override(a int16, b int16) C.short {
+	if b == colUndefined {
+		return C.short(a)
+	}
+	return C.short(b)
+}
+
+func initPairs(baseTheme *ColorTheme, theme *ColorTheme, black bool) {
+	fg := override(baseTheme.Fg, theme.Fg)
+	bg := override(baseTheme.Bg, theme.Bg)
 	if black {
 		bg = C.COLOR_BLACK
-	} else {
+	} else if theme.UseDefault {
+		fg = colDefault
+		bg = colDefault
 		C.use_default_colors()
-		bg = -1
+	}
+	if theme.UseDefault {
+		FG = colDefault
+		BG = colDefault
+	} else {
+		FG = int(fg)
+		BG = int(bg)
+		C.assume_default_colors(C.int(override(baseTheme.Fg, theme.Fg)), C.int(bg))
 	}
 
-	DarkBG = theme.darkBg
-	C.init_pair(ColPrompt, theme.prompt, bg)
-	C.init_pair(ColMatch, theme.match, bg)
-	C.init_pair(ColCurrent, theme.current, DarkBG)
-	C.init_pair(ColCurrentMatch, theme.currentMatch, DarkBG)
-	C.init_pair(ColSpinner, theme.spinner, bg)
-	C.init_pair(ColInfo, theme.info, bg)
-	C.init_pair(ColCursor, theme.cursor, DarkBG)
-	C.init_pair(ColSelected, theme.selected, DarkBG)
+	currentFG := override(baseTheme.Current, theme.Current)
+	darkBG := override(baseTheme.DarkBg, theme.DarkBg)
+	CurrentFG = int(currentFG)
+	DarkBG = int(darkBG)
+	C.init_pair(ColPrompt, override(baseTheme.Prompt, theme.Prompt), bg)
+	C.init_pair(ColMatch, override(baseTheme.Match, theme.Match), bg)
+	C.init_pair(ColCurrent, currentFG, darkBG)
+	C.init_pair(ColCurrentMatch, override(baseTheme.CurrentMatch, theme.CurrentMatch), darkBG)
+	C.init_pair(ColSpinner, override(baseTheme.Spinner, theme.Spinner), bg)
+	C.init_pair(ColInfo, override(baseTheme.Info, theme.Info), bg)
+	C.init_pair(ColCursor, override(baseTheme.Cursor, theme.Cursor), darkBG)
+	C.init_pair(ColSelected, override(baseTheme.Selected, theme.Selected), darkBG)
+	C.init_pair(ColHeader, override(baseTheme.Header, theme.Header), bg)
+	C.init_pair(ColBorder, override(baseTheme.Border, theme.Border), bg)
 }
 
 func Close() {
 	C.endwin()
-	C.swapOutput()
+	C.delscreen(_screen)
 }
 
 func GetBytes() []byte {
@@ -330,7 +447,9 @@ func mouseSequence(sz *int) Event {
 		97, 101, 105, 113: // scroll-down / shift / cmd / ctrl
 		mod := _buf[3] >= 100
 		s := 1 - int(_buf[3]%2)*2
-		return Event{Mouse, 0, &MouseEvent{0, 0, s, false, false, mod}}
+		x := int(_buf[4] - 33)
+		y := int(_buf[5] - 33)
+		return Event{Mouse, 0, &MouseEvent{y, x, s, false, false, mod}}
 	}
 	return Event{Invalid, 0, nil}
 }
@@ -341,6 +460,12 @@ func escSequence(sz *int) Event {
 	}
 	*sz = 2
 	switch _buf[1] {
+	case 13:
+		return Event{AltEnter, 0, nil}
+	case 32:
+		return Event{AltSpace, 0, nil}
+	case 47:
+		return Event{AltSlash, 0, nil}
 	case 98:
 		return Event{AltB, 0, nil}
 	case 100:
@@ -356,19 +481,19 @@ func escSequence(sz *int) Event {
 		*sz = 3
 		switch _buf[2] {
 		case 68:
-			return Event{CtrlB, 0, nil}
+			return Event{Left, 0, nil}
 		case 67:
-			return Event{CtrlF, 0, nil}
+			return Event{Right, 0, nil}
 		case 66:
-			return Event{CtrlJ, 0, nil}
+			return Event{Down, 0, nil}
 		case 65:
-			return Event{CtrlK, 0, nil}
+			return Event{Up, 0, nil}
 		case 90:
 			return Event{BTab, 0, nil}
 		case 72:
-			return Event{CtrlA, 0, nil}
+			return Event{Home, 0, nil}
 		case 70:
-			return Event{CtrlE, 0, nil}
+			return Event{End, 0, nil}
 		case 77:
 			return mouseSequence(sz)
 		case 80:
@@ -386,11 +511,25 @@ func escSequence(sz *int) Event {
 			*sz = 4
 			switch _buf[2] {
 			case 50:
+				if len(_buf) == 5 && _buf[4] == 126 {
+					*sz = 5
+					switch _buf[3] {
+					case 48:
+						return Event{F9, 0, nil}
+					case 49:
+						return Event{F10, 0, nil}
+					}
+				}
+				// Bracketed paste mode \e[200~ / \e[201
+				if _buf[3] == 48 && (_buf[4] == 48 || _buf[4] == 49) && _buf[5] == 126 {
+					*sz = 6
+					return Event{Invalid, 0, nil}
+				}
 				return Event{Invalid, 0, nil} // INS
 			case 51:
 				return Event{Del, 0, nil}
 			case 52:
-				return Event{CtrlE, 0, nil}
+				return Event{End, 0, nil}
 			case 53:
 				return Event{PgUp, 0, nil}
 			case 54:
@@ -398,7 +537,22 @@ func escSequence(sz *int) Event {
 			case 49:
 				switch _buf[3] {
 				case 126:
-					return Event{CtrlA, 0, nil}
+					return Event{Home, 0, nil}
+				case 53, 55, 56, 57:
+					if len(_buf) == 5 && _buf[4] == 126 {
+						*sz = 5
+						switch _buf[3] {
+						case 53:
+							return Event{F5, 0, nil}
+						case 55:
+							return Event{F6, 0, nil}
+						case 56:
+							return Event{F7, 0, nil}
+						case 57:
+							return Event{F8, 0, nil}
+						}
+					}
+					return Event{Invalid, 0, nil}
 				case 59:
 					if len(_buf) != 6 {
 						return Event{Invalid, 0, nil}
@@ -408,16 +562,16 @@ func escSequence(sz *int) Event {
 					case 50:
 						switch _buf[5] {
 						case 68:
-							return Event{CtrlA, 0, nil}
+							return Event{Home, 0, nil}
 						case 67:
-							return Event{CtrlE, 0, nil}
+							return Event{End, 0, nil}
 						}
 					case 53:
 						switch _buf[5] {
 						case 68:
-							return Event{AltB, 0, nil}
+							return Event{SLeft, 0, nil}
 						case 67:
-							return Event{AltF, 0, nil}
+							return Event{SRight, 0, nil}
 						}
 					} // _buf[4]
 				} // _buf[3]
@@ -444,10 +598,14 @@ func GetChar() Event {
 	}()
 
 	switch _buf[0] {
-	case CtrlC, CtrlG, CtrlQ:
+	case CtrlC:
 		return Event{CtrlC, 0, nil}
+	case CtrlG:
+		return Event{CtrlG, 0, nil}
+	case CtrlQ:
+		return Event{CtrlQ, 0, nil}
 	case 127:
-		return Event{CtrlH, 0, nil}
+		return Event{BSpace, 0, nil}
 	case ESC:
 		return escSequence(&sz)
 	}
@@ -464,24 +622,37 @@ func GetChar() Event {
 	return Event{Rune, r, nil}
 }
 
-func Move(y int, x int) {
-	C.move(C.int(y), C.int(x))
+func (w *Window) Close() {
+	C.delwin(w.win)
 }
 
-func MoveAndClear(y int, x int) {
-	Move(y, x)
-	C.clrtoeol()
+func (w *Window) Enclose(y int, x int) bool {
+	return bool(C.wenclose(w.win, C.int(y), C.int(x)))
 }
 
-func Print(text string) {
-	C.addstr(C.CString(text))
+func (w *Window) Move(y int, x int) {
+	C.wmove(w.win, C.int(y), C.int(x))
 }
 
-func CPrint(pair int, bold bool, text string) {
+func (w *Window) MoveAndClear(y int, x int) {
+	w.Move(y, x)
+	C.wclrtoeol(w.win)
+}
+
+func (w *Window) Print(text string) {
+	C.waddstr(w.win, C.CString(strings.Map(func(r rune) rune {
+		if r < 32 {
+			return -1
+		}
+		return r
+	}, text)))
+}
+
+func (w *Window) CPrint(pair int, bold bool, text string) {
 	attr := _color(pair, bold)
-	C.attron(attr)
-	Print(text)
-	C.attroff(attr)
+	C.wattron(w.win, attr)
+	w.Print(text)
+	C.wattroff(w.win, attr)
 }
 
 func Clear() {
@@ -494,6 +665,30 @@ func Endwin() {
 
 func Refresh() {
 	C.refresh()
+}
+
+func (w *Window) Erase() {
+	C.werase(w.win)
+}
+
+func (w *Window) Fill(str string) bool {
+	return C.waddstr(w.win, C.CString(str)) == C.OK
+}
+
+func (w *Window) CFill(str string, fg int, bg int, bold bool) bool {
+	attr := _color(PairFor(fg, bg), bold)
+	C.wattron(w.win, attr)
+	ret := w.Fill(str)
+	C.wattroff(w.win, attr)
+	return ret
+}
+
+func (w *Window) Refresh() {
+	C.wnoutrefresh(w.win)
+}
+
+func DoUpdate() {
+	C.doupdate()
 }
 
 func PairFor(fg int, bg int) int {

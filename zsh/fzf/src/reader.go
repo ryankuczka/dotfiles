@@ -4,15 +4,15 @@ import (
 	"bufio"
 	"io"
 	"os"
-	"os/exec"
 
 	"github.com/junegunn/fzf/src/util"
 )
 
 // Reader reads from command or standard input
 type Reader struct {
-	pusher   func(string)
+	pusher   func([]byte) bool
 	eventBox *util.EventBox
+	delimNil bool
 }
 
 // ReadSource reads data from the default command or from standard input
@@ -30,10 +30,25 @@ func (r *Reader) ReadSource() {
 }
 
 func (r *Reader) feed(src io.Reader) {
-	if scanner := bufio.NewScanner(src); scanner != nil {
-		for scanner.Scan() {
-			r.pusher(scanner.Text())
-			r.eventBox.Set(EvtReadNew, nil)
+	delim := byte('\n')
+	if r.delimNil {
+		delim = '\000'
+	}
+	reader := bufio.NewReaderSize(src, readerBufferSize)
+	for {
+		// ReadBytes returns err != nil if and only if the returned data does not
+		// end in delim.
+		bytea, err := reader.ReadBytes(delim)
+		if len(bytea) > 0 {
+			if err == nil {
+				bytea = bytea[:len(bytea)-1]
+			}
+			if r.pusher(bytea) {
+				r.eventBox.Set(EvtReadNew, nil)
+			}
+		}
+		if err != nil {
+			break
 		}
 	}
 }
@@ -43,7 +58,7 @@ func (r *Reader) readFromStdin() {
 }
 
 func (r *Reader) readFromCommand(cmd string) {
-	listCommand := exec.Command("sh", "-c", cmd)
+	listCommand := util.ExecCommand(cmd)
 	out, err := listCommand.StdoutPipe()
 	if err != nil {
 		return
