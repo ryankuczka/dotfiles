@@ -2,10 +2,10 @@ package fzf
 
 import (
 	"regexp"
-	"sort"
 	"strings"
 
 	"github.com/junegunn/fzf/src/algo"
+	"github.com/junegunn/fzf/src/util"
 )
 
 // fuzzy
@@ -24,6 +24,7 @@ const (
 	termExact
 	termPrefix
 	termSuffix
+	termEqual
 )
 
 type term struct {
@@ -34,16 +35,20 @@ type term struct {
 	origText      []rune
 }
 
+type termSet []term
+
 // Pattern represents search pattern
 type Pattern struct {
-	mode          Mode
+	fuzzy         bool
+	extended      bool
 	caseSensitive bool
+	forward       bool
 	text          []rune
-	terms         []term
-	hasInvTerm    bool
-	delimiter     *regexp.Regexp
+	termSets      []termSet
+	cacheable     bool
+	delimiter     Delimiter
 	nth           []Range
-	procFun       map[termType]func(bool, *[]rune, []rune) (int, int)
+	procFun       map[termType]func(bool, bool, util.Chars, []rune) algo.Result
 }
 
 var (
@@ -60,7 +65,7 @@ func init() {
 
 func clearPatternCache() {
 	// We can uniquely identify the pattern for a given string since
-	// mode and caseMode do not change while the program is running
+	// search mode and caseMode do not change while the program is running
 	_patternCache = make(map[string]*Pattern)
 }
 
@@ -69,14 +74,13 @@ func clearChunkCache() {
 }
 
 // BuildPattern builds Pattern object from the given arguments
-func BuildPattern(mode Mode, caseMode Case,
-	nth []Range, delimiter *regexp.Regexp, runes []rune) *Pattern {
+func BuildPattern(fuzzy bool, extended bool, caseMode Case, forward bool,
+	cacheable bool, nth []Range, delimiter Delimiter, runes []rune) *Pattern {
 
 	var asString string
-	switch mode {
-	case ModeExtended, ModeExtendedExact:
+	if extended {
 		asString = strings.Trim(string(runes), " ")
-	default:
+	} else {
 		asString = string(runes)
 	}
 
@@ -85,18 +89,23 @@ func BuildPattern(mode Mode, caseMode Case,
 		return cached
 	}
 
-	caseSensitive, hasInvTerm := true, false
-	terms := []term{}
+	caseSensitive := true
+	termSets := []termSet{}
 
-	switch mode {
-	case ModeExtended, ModeExtendedExact:
-		terms = parseTerms(mode, caseMode, asString)
-		for _, term := range terms {
-			if term.inv {
-				hasInvTerm = true
+	if extended {
+		termSets = parseTerms(fuzzy, caseMode, asString)
+	Loop:
+		for _, termSet := range termSets {
+			for idx, term := range termSet {
+				// If the query contains inverse search terms or OR operators,
+				// we cannot cache the search scope
+				if !cacheable || idx > 0 || term.inv {
+					cacheable = false
+					break Loop
+				}
 			}
 		}
-	default:
+	} else {
 		lowerString := strings.ToLower(asString)
 		caseSensitive = caseMode == CaseRespect ||
 			caseMode == CaseSmart && lowerString != asString
@@ -106,16 +115,19 @@ func BuildPattern(mode Mode, caseMode Case,
 	}
 
 	ptr := &Pattern{
-		mode:          mode,
+		fuzzy:         fuzzy,
+		extended:      extended,
 		caseSensitive: caseSensitive,
+		forward:       forward,
 		text:          []rune(asString),
-		terms:         terms,
-		hasInvTerm:    hasInvTerm,
+		termSets:      termSets,
+		cacheable:     cacheable,
 		nth:           nth,
 		delimiter:     delimiter,
-		procFun:       make(map[termType]func(bool, *[]rune, []rune) (int, int))}
+		procFun:       make(map[termType]func(bool, bool, util.Chars, []rune) algo.Result)}
 
 	ptr.procFun[termFuzzy] = algo.FuzzyMatch
+	ptr.procFun[termEqual] = algo.EqualMatch
 	ptr.procFun[termExact] = algo.ExactMatchNaive
 	ptr.procFun[termPrefix] = algo.PrefixMatch
 	ptr.procFun[termSuffix] = algo.SuffixMatch
@@ -124,9 +136,11 @@ func BuildPattern(mode Mode, caseMode Case,
 	return ptr
 }
 
-func parseTerms(mode Mode, caseMode Case, str string) []term {
+func parseTerms(fuzzy bool, caseMode Case, str string) []termSet {
 	tokens := _splitRegex.Split(str, -1)
-	terms := []term{}
+	sets := []termSet{}
+	set := termSet{}
+	switchSet := false
 	for _, token := range tokens {
 		typ, inv, text := termFuzzy, false, token
 		lowerText := strings.ToLower(text)
@@ -136,8 +150,13 @@ func parseTerms(mode Mode, caseMode Case, str string) []term {
 			text = lowerText
 		}
 		origText := []rune(text)
-		if mode == ModeExtendedExact {
+		if !fuzzy {
 			typ = termExact
+		}
+
+		if text == "|" {
+			switchSet = false
+			continue
 		}
 
 		if strings.HasPrefix(text, "!") {
@@ -146,36 +165,53 @@ func parseTerms(mode Mode, caseMode Case, str string) []term {
 		}
 
 		if strings.HasPrefix(text, "'") {
-			if mode == ModeExtended {
+			// Flip exactness
+			if fuzzy {
 				typ = termExact
+				text = text[1:]
+			} else {
+				typ = termFuzzy
 				text = text[1:]
 			}
 		} else if strings.HasPrefix(text, "^") {
-			typ = termPrefix
-			text = text[1:]
+			if strings.HasSuffix(text, "$") {
+				typ = termEqual
+				text = text[1 : len(text)-1]
+			} else {
+				typ = termPrefix
+				text = text[1:]
+			}
 		} else if strings.HasSuffix(text, "$") {
 			typ = termSuffix
 			text = text[:len(text)-1]
 		}
 
 		if len(text) > 0 {
-			terms = append(terms, term{
+			if switchSet {
+				sets = append(sets, set)
+				set = termSet{}
+			}
+			set = append(set, term{
 				typ:           typ,
 				inv:           inv,
 				text:          []rune(text),
 				caseSensitive: caseSensitive,
 				origText:      origText})
+			switchSet = true
 		}
 	}
-	return terms
+	if len(set) > 0 {
+		sets = append(sets, set)
+	}
+	return sets
 }
 
 // IsEmpty returns true if the pattern is effectively empty
 func (p *Pattern) IsEmpty() bool {
-	if p.mode == ModeFuzzy {
+	if !p.extended {
 		return len(p.text) == 0
 	}
-	return len(p.terms) == 0
+	return len(p.termSets) == 0
 }
 
 // AsString returns the search query in string type
@@ -185,32 +221,30 @@ func (p *Pattern) AsString() string {
 
 // CacheKey is used to build string to be used as the key of result cache
 func (p *Pattern) CacheKey() string {
-	if p.mode == ModeFuzzy {
+	if !p.extended {
 		return p.AsString()
 	}
 	cacheableTerms := []string{}
-	for _, term := range p.terms {
-		if term.inv {
-			continue
+	for _, termSet := range p.termSets {
+		if len(termSet) == 1 && !termSet[0].inv && (p.fuzzy || termSet[0].typ == termExact) {
+			cacheableTerms = append(cacheableTerms, string(termSet[0].origText))
 		}
-		cacheableTerms = append(cacheableTerms, string(term.origText))
 	}
 	return strings.Join(cacheableTerms, " ")
 }
 
 // Match returns the list of matches Items in the given Chunk
-func (p *Pattern) Match(chunk *Chunk) []*Item {
-	space := chunk
-
+func (p *Pattern) Match(chunk *Chunk) []*Result {
 	// ChunkCache: Exact match
 	cacheKey := p.CacheKey()
-	if !p.hasInvTerm { // Because we're excluding Inv-term from cache key
+	if p.cacheable {
 		if cached, found := _cache.Find(chunk, cacheKey); found {
 			return cached
 		}
 	}
 
-	// ChunkCache: Prefix/suffix match
+	// Prefix/suffix cache
+	var space []*Result
 Loop:
 	for idx := 1; idx < len(cacheKey); idx++ {
 		// [---------| ] | [ |---------]
@@ -220,34 +254,33 @@ Loop:
 		suffix := cacheKey[idx:]
 		for _, substr := range [2]*string{&prefix, &suffix} {
 			if cached, found := _cache.Find(chunk, *substr); found {
-				cachedChunk := Chunk(cached)
-				space = &cachedChunk
+				space = cached
 				break Loop
 			}
 		}
 	}
 
-	matches := p.matchChunk(space)
+	matches := p.matchChunk(chunk, space)
 
-	if !p.hasInvTerm {
+	if p.cacheable {
 		_cache.Add(chunk, cacheKey, matches)
 	}
 	return matches
 }
 
-func (p *Pattern) matchChunk(chunk *Chunk) []*Item {
-	matches := []*Item{}
-	if p.mode == ModeFuzzy {
+func (p *Pattern) matchChunk(chunk *Chunk, space []*Result) []*Result {
+	matches := []*Result{}
+
+	if space == nil {
 		for _, item := range *chunk {
-			if sidx, eidx := p.fuzzyMatch(item); sidx >= 0 {
-				matches = append(matches,
-					dupItem(item, []Offset{Offset{int32(sidx), int32(eidx)}}))
+			if match, _ := p.MatchItem(item); match != nil {
+				matches = append(matches, match)
 			}
 		}
 	} else {
-		for _, item := range *chunk {
-			if offsets := p.extendedMatch(item); len(offsets) == len(p.terms) {
-				matches = append(matches, dupItem(item, offsets))
+		for _, result := range space {
+			if match, _ := p.MatchItem(result.item); match != nil {
+				matches = append(matches, match)
 			}
 		}
 	}
@@ -255,74 +288,88 @@ func (p *Pattern) matchChunk(chunk *Chunk) []*Item {
 }
 
 // MatchItem returns true if the Item is a match
-func (p *Pattern) MatchItem(item *Item) bool {
-	if p.mode == ModeFuzzy {
-		sidx, _ := p.fuzzyMatch(item)
-		return sidx >= 0
+func (p *Pattern) MatchItem(item *Item) (*Result, []Offset) {
+	if p.extended {
+		if offsets, bonus, trimLen := p.extendedMatch(item); len(offsets) == len(p.termSets) {
+			return buildResult(item, offsets, bonus, trimLen), offsets
+		}
+		return nil, nil
 	}
-	offsets := p.extendedMatch(item)
-	return len(offsets) == len(p.terms)
+	offset, bonus, trimLen := p.basicMatch(item)
+	if sidx := offset[0]; sidx >= 0 {
+		offsets := []Offset{offset}
+		return buildResult(item, offsets, bonus, trimLen), offsets
+	}
+	return nil, nil
 }
 
-func dupItem(item *Item, offsets []Offset) *Item {
-	sort.Sort(ByOrder(offsets))
-	return &Item{
-		text:        item.text,
-		origText:    item.origText,
-		transformed: item.transformed,
-		index:       item.index,
-		offsets:     offsets,
-		colors:      item.colors,
-		rank:        Rank{0, 0, item.index}}
-}
-
-func (p *Pattern) fuzzyMatch(item *Item) (int, int) {
+func (p *Pattern) basicMatch(item *Item) (Offset, int, int) {
 	input := p.prepareInput(item)
-	return p.iter(algo.FuzzyMatch, input, p.caseSensitive, p.text)
+	if p.fuzzy {
+		return p.iter(algo.FuzzyMatch, input, p.caseSensitive, p.forward, p.text)
+	}
+	return p.iter(algo.ExactMatchNaive, input, p.caseSensitive, p.forward, p.text)
 }
 
-func (p *Pattern) extendedMatch(item *Item) []Offset {
+func (p *Pattern) extendedMatch(item *Item) ([]Offset, int, int) {
 	input := p.prepareInput(item)
 	offsets := []Offset{}
-	for _, term := range p.terms {
-		pfun := p.procFun[term.typ]
-		if sidx, eidx := p.iter(pfun, input, term.caseSensitive, term.text); sidx >= 0 {
-			if term.inv {
+	var totalBonus int
+	var totalTrimLen int
+	for _, termSet := range p.termSets {
+		var offset Offset
+		var bonus int
+		var trimLen int
+		matched := false
+		for _, term := range termSet {
+			pfun := p.procFun[term.typ]
+			off, pen, tLen := p.iter(pfun, input, term.caseSensitive, p.forward, term.text)
+			if sidx := off[0]; sidx >= 0 {
+				if term.inv {
+					continue
+				}
+				offset, bonus, trimLen = off, pen, tLen
+				matched = true
 				break
+			} else if term.inv {
+				offset, bonus, trimLen = Offset{0, 0}, 0, 0
+				matched = true
+				continue
 			}
-			offsets = append(offsets, Offset{int32(sidx), int32(eidx)})
-		} else if term.inv {
-			offsets = append(offsets, Offset{0, 0})
+		}
+		if matched {
+			offsets = append(offsets, offset)
+			totalBonus += bonus
+			totalTrimLen += trimLen
 		}
 	}
-	return offsets
+	return offsets, totalBonus, totalTrimLen
 }
 
-func (p *Pattern) prepareInput(item *Item) *[]Token {
+func (p *Pattern) prepareInput(item *Item) []Token {
 	if item.transformed != nil {
 		return item.transformed
 	}
 
-	var ret *[]Token
-	if len(p.nth) > 0 {
+	var ret []Token
+	if len(p.nth) == 0 {
+		ret = []Token{Token{text: &item.text, prefixLength: 0, trimLength: int32(item.text.TrimLength())}}
+	} else {
 		tokens := Tokenize(item.text, p.delimiter)
 		ret = Transform(tokens, p.nth)
-	} else {
-		runes := []rune(*item.text)
-		trans := []Token{Token{text: &runes, prefixLength: 0}}
-		ret = &trans
 	}
 	item.transformed = ret
 	return ret
 }
 
-func (p *Pattern) iter(pfun func(bool, *[]rune, []rune) (int, int),
-	tokens *[]Token, caseSensitive bool, pattern []rune) (int, int) {
-	for _, part := range *tokens {
-		prefixLength := part.prefixLength
-		if sidx, eidx := pfun(caseSensitive, part.text, pattern); sidx >= 0 {
-			return sidx + prefixLength, eidx + prefixLength
+func (p *Pattern) iter(pfun func(bool, bool, util.Chars, []rune) algo.Result,
+	tokens []Token, caseSensitive bool, forward bool, pattern []rune) (Offset, int, int) {
+	for _, part := range tokens {
+		if res := pfun(caseSensitive, forward, *part.text, pattern); res.Start >= 0 {
+			sidx := int32(res.Start) + part.prefixLength
+			eidx := int32(res.End) + part.prefixLength
+			return Offset{sidx, eidx}, res.Bonus, int(part.trimLength)
 		}
 	}
-	return -1, -1
+	return Offset{-1, -1}, 0, -1
 }

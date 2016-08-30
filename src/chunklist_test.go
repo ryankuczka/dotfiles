@@ -3,11 +3,16 @@ package fzf
 import (
 	"fmt"
 	"testing"
+
+	"github.com/junegunn/fzf/src/util"
 )
 
 func TestChunkList(t *testing.T) {
-	cl := NewChunkList(func(s *string, i int) *Item {
-		return &Item{text: s, rank: Rank{0, 0, uint32(i * 2)}}
+	// FIXME global
+	sortCriteria = []criterion{byMatchLen, byLength}
+
+	cl := NewChunkList(func(s []byte, i int) *Item {
+		return &Item{text: util.ToChars(s), index: int32(i * 2)}
 	})
 
 	// Snapshot
@@ -17,8 +22,8 @@ func TestChunkList(t *testing.T) {
 	}
 
 	// Add some data
-	cl.Push("hello")
-	cl.Push("world")
+	cl.Push([]byte("hello"))
+	cl.Push([]byte("world"))
 
 	// Previously created snapshot should remain the same
 	if len(snapshot) > 0 {
@@ -36,8 +41,8 @@ func TestChunkList(t *testing.T) {
 	if len(*chunk1) != 2 {
 		t.Error("Snapshot should contain only two items")
 	}
-	if *(*chunk1)[0].text != "hello" || (*chunk1)[0].rank.index != 0 ||
-		*(*chunk1)[1].text != "world" || (*chunk1)[1].rank.index != 2 {
+	if (*chunk1)[0].text.ToString() != "hello" || (*chunk1)[0].index != 0 ||
+		(*chunk1)[1].text.ToString() != "world" || (*chunk1)[1].index != 2 {
 		t.Error("Invalid data")
 	}
 	if chunk1.IsFull() {
@@ -46,7 +51,7 @@ func TestChunkList(t *testing.T) {
 
 	// Add more data
 	for i := 0; i < chunkSize*2; i++ {
-		cl.Push(fmt.Sprintf("item %d", i))
+		cl.Push([]byte(fmt.Sprintf("item %d", i)))
 	}
 
 	// Previous snapshot should remain the same
@@ -64,8 +69,8 @@ func TestChunkList(t *testing.T) {
 		t.Error("Unexpected number of items")
 	}
 
-	cl.Push("hello")
-	cl.Push("world")
+	cl.Push([]byte("hello"))
+	cl.Push([]byte("world"))
 
 	lastChunkCount := len(*snapshot[len(snapshot)-1])
 	if lastChunkCount != 2 {

@@ -1,6 +1,7 @@
 package algo
 
 import (
+	"strings"
 	"unicode"
 
 	"github.com/junegunn/fzf/src/util"
@@ -14,10 +15,101 @@ import (
  * In short: They try to do as little work as possible.
  */
 
+func indexAt(index int, max int, forward bool) int {
+	if forward {
+		return index
+	}
+	return max - index - 1
+}
+
+// Result conatins the results of running a match function.
+type Result struct {
+	Start int
+	End   int
+
+	// Items are basically sorted by the lengths of matched substrings.
+	// But we slightly adjust the score with bonus for better results.
+	Bonus int
+}
+
+type charClass int
+
+const (
+	charNonWord charClass = iota
+	charLower
+	charUpper
+	charLetter
+	charNumber
+)
+
+func evaluateBonus(caseSensitive bool, text util.Chars, pattern []rune, sidx int, eidx int) int {
+	var bonus int
+	pidx := 0
+	lenPattern := len(pattern)
+	consecutive := false
+	prevClass := charNonWord
+	for index := util.Max(0, sidx-1); index < eidx; index++ {
+		char := text.Get(index)
+		var class charClass
+		if unicode.IsLower(char) {
+			class = charLower
+		} else if unicode.IsUpper(char) {
+			class = charUpper
+		} else if unicode.IsLetter(char) {
+			class = charLetter
+		} else if unicode.IsNumber(char) {
+			class = charNumber
+		} else {
+			class = charNonWord
+		}
+
+		var point int
+		if prevClass == charNonWord && class != charNonWord {
+			// Word boundary
+			point = 2
+		} else if prevClass == charLower && class == charUpper ||
+			prevClass != charNumber && class == charNumber {
+			// camelCase letter123
+			point = 1
+		}
+		prevClass = class
+
+		if index >= sidx {
+			if !caseSensitive {
+				if char >= 'A' && char <= 'Z' {
+					char += 32
+				} else if char > unicode.MaxASCII {
+					char = unicode.To(unicode.LowerCase, char)
+				}
+			}
+			pchar := pattern[pidx]
+			if pchar == char {
+				// Boost bonus for the first character in the pattern
+				if pidx == 0 {
+					point *= 2
+				}
+				// Bonus to consecutive matching chars
+				if consecutive {
+					point++
+				}
+				bonus += point
+
+				if pidx++; pidx == lenPattern {
+					break
+				}
+				consecutive = true
+			} else {
+				consecutive = false
+			}
+		}
+	}
+	return bonus
+}
+
 // FuzzyMatch performs fuzzy-match
-func FuzzyMatch(caseSensitive bool, runes *[]rune, pattern []rune) (int, int) {
+func FuzzyMatch(caseSensitive bool, forward bool, text util.Chars, pattern []rune) Result {
 	if len(pattern) == 0 {
-		return 0, 0
+		return Result{0, 0, 0}
 	}
 
 	// 0. (FIXME) How to find the shortest match?
@@ -33,7 +125,11 @@ func FuzzyMatch(caseSensitive bool, runes *[]rune, pattern []rune) (int, int) {
 	sidx := -1
 	eidx := -1
 
-	for index, char := range *runes {
+	lenRunes := text.Length()
+	lenPattern := len(pattern)
+
+	for index := 0; index < lenRunes; index++ {
+		char := text.Get(indexAt(index, lenRunes, forward))
 		// This is considerably faster than blindly applying strings.ToLower to the
 		// whole string
 		if !caseSensitive {
@@ -46,11 +142,12 @@ func FuzzyMatch(caseSensitive bool, runes *[]rune, pattern []rune) (int, int) {
 				char = unicode.To(unicode.LowerCase, char)
 			}
 		}
-		if char == pattern[pidx] {
+		pchar := pattern[indexAt(pidx, lenPattern, forward)]
+		if char == pchar {
 			if sidx < 0 {
 				sidx = index
 			}
-			if pidx++; pidx == len(pattern) {
+			if pidx++; pidx == lenPattern {
 				eidx = index + 1
 				break
 			}
@@ -60,7 +157,7 @@ func FuzzyMatch(caseSensitive bool, runes *[]rune, pattern []rune) (int, int) {
 	if sidx >= 0 && eidx >= 0 {
 		pidx--
 		for index := eidx - 1; index >= sidx; index-- {
-			char := (*runes)[index]
+			char := text.Get(indexAt(index, lenRunes, forward))
 			if !caseSensitive {
 				if char >= 'A' && char <= 'Z' {
 					char += 32
@@ -68,16 +165,26 @@ func FuzzyMatch(caseSensitive bool, runes *[]rune, pattern []rune) (int, int) {
 					char = unicode.To(unicode.LowerCase, char)
 				}
 			}
-			if char == pattern[pidx] {
+
+			pchar := pattern[indexAt(pidx, lenPattern, forward)]
+			if char == pchar {
 				if pidx--; pidx < 0 {
 					sidx = index
 					break
 				}
 			}
 		}
-		return sidx, eidx
+
+		// Calculate the bonus. This can't be done at the same time as the
+		// pattern scan above because 'forward' may be false.
+		if !forward {
+			sidx, eidx = lenRunes-eidx, lenRunes-sidx
+		}
+
+		return Result{sidx, eidx,
+			evaluateBonus(caseSensitive, text, pattern, sidx, eidx)}
 	}
-	return -1, -1
+	return Result{-1, -1, 0}
 }
 
 // ExactMatchNaive is a basic string searching algorithm that handles case
@@ -87,20 +194,21 @@ func FuzzyMatch(caseSensitive bool, runes *[]rune, pattern []rune) (int, int) {
 //
 // We might try to implement better algorithms in the future:
 // http://en.wikipedia.org/wiki/String_searching_algorithm
-func ExactMatchNaive(caseSensitive bool, runes *[]rune, pattern []rune) (int, int) {
+func ExactMatchNaive(caseSensitive bool, forward bool, text util.Chars, pattern []rune) Result {
 	if len(pattern) == 0 {
-		return 0, 0
+		return Result{0, 0, 0}
 	}
 
-	numRunes := len(*runes)
-	plen := len(pattern)
-	if numRunes < plen {
-		return -1, -1
+	lenRunes := text.Length()
+	lenPattern := len(pattern)
+
+	if lenRunes < lenPattern {
+		return Result{-1, -1, 0}
 	}
 
 	pidx := 0
-	for index := 0; index < numRunes; index++ {
-		char := (*runes)[index]
+	for index := 0; index < lenRunes; index++ {
+		char := text.Get(indexAt(index, lenRunes, forward))
 		if !caseSensitive {
 			if char >= 'A' && char <= 'Z' {
 				char += 32
@@ -108,54 +216,85 @@ func ExactMatchNaive(caseSensitive bool, runes *[]rune, pattern []rune) (int, in
 				char = unicode.To(unicode.LowerCase, char)
 			}
 		}
-		if pattern[pidx] == char {
+		pchar := pattern[indexAt(pidx, lenPattern, forward)]
+		if pchar == char {
 			pidx++
-			if pidx == plen {
-				return index - plen + 1, index + 1
+			if pidx == lenPattern {
+				var sidx, eidx int
+				if forward {
+					sidx = index - lenPattern + 1
+					eidx = index + 1
+				} else {
+					sidx = lenRunes - (index + 1)
+					eidx = lenRunes - (index - lenPattern + 1)
+				}
+				return Result{sidx, eidx,
+					evaluateBonus(caseSensitive, text, pattern, sidx, eidx)}
 			}
 		} else {
 			index -= pidx
 			pidx = 0
 		}
 	}
-	return -1, -1
+	return Result{-1, -1, 0}
 }
 
 // PrefixMatch performs prefix-match
-func PrefixMatch(caseSensitive bool, runes *[]rune, pattern []rune) (int, int) {
-	if len(*runes) < len(pattern) {
-		return -1, -1
+func PrefixMatch(caseSensitive bool, forward bool, text util.Chars, pattern []rune) Result {
+	if text.Length() < len(pattern) {
+		return Result{-1, -1, 0}
 	}
 
 	for index, r := range pattern {
-		char := (*runes)[index]
+		char := text.Get(index)
 		if !caseSensitive {
 			char = unicode.ToLower(char)
 		}
 		if char != r {
-			return -1, -1
+			return Result{-1, -1, 0}
 		}
 	}
-	return 0, len(pattern)
+	lenPattern := len(pattern)
+	return Result{0, lenPattern,
+		evaluateBonus(caseSensitive, text, pattern, 0, lenPattern)}
 }
 
 // SuffixMatch performs suffix-match
-func SuffixMatch(caseSensitive bool, input *[]rune, pattern []rune) (int, int) {
-	runes := util.TrimRight(input)
-	trimmedLen := len(runes)
+func SuffixMatch(caseSensitive bool, forward bool, text util.Chars, pattern []rune) Result {
+	trimmedLen := text.Length() - text.TrailingWhitespaces()
 	diff := trimmedLen - len(pattern)
 	if diff < 0 {
-		return -1, -1
+		return Result{-1, -1, 0}
 	}
 
 	for index, r := range pattern {
-		char := runes[index+diff]
+		char := text.Get(index + diff)
 		if !caseSensitive {
 			char = unicode.ToLower(char)
 		}
 		if char != r {
-			return -1, -1
+			return Result{-1, -1, 0}
 		}
 	}
-	return trimmedLen - len(pattern), trimmedLen
+	lenPattern := len(pattern)
+	sidx := trimmedLen - lenPattern
+	eidx := trimmedLen
+	return Result{sidx, eidx,
+		evaluateBonus(caseSensitive, text, pattern, sidx, eidx)}
+}
+
+// EqualMatch performs equal-match
+func EqualMatch(caseSensitive bool, forward bool, text util.Chars, pattern []rune) Result {
+	// Note: EqualMatch always return a zero bonus.
+	if text.Length() != len(pattern) {
+		return Result{-1, -1, 0}
+	}
+	runesStr := text.ToString()
+	if !caseSensitive {
+		runesStr = strings.ToLower(runesStr)
+	}
+	if runesStr == string(pattern) {
+		return Result{0, len(pattern), 0}
+	}
+	return Result{-1, -1, 0}
 }

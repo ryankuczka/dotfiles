@@ -36,21 +36,27 @@ func init() {
 	ansiRegex = regexp.MustCompile("\x1b\\[[0-9;]*[mK]")
 }
 
-func extractColor(str *string) (*string, []ansiOffset) {
+func extractColor(str string, state *ansiState, proc func(string, *ansiState) bool) (string, *[]ansiOffset, *ansiState) {
 	var offsets []ansiOffset
-
 	var output bytes.Buffer
-	var state *ansiState
+
+	if state != nil {
+		offsets = append(offsets, ansiOffset{[2]int32{0, 0}, *state})
+	}
 
 	idx := 0
-	for _, offset := range ansiRegex.FindAllStringIndex(*str, -1) {
-		output.WriteString((*str)[idx:offset[0]])
-		newState := interpretCode((*str)[offset[0]:offset[1]], state)
+	for _, offset := range ansiRegex.FindAllStringIndex(str, -1) {
+		prev := str[idx:offset[0]]
+		output.WriteString(prev)
+		if proc != nil && !proc(prev, state) {
+			return "", nil, nil
+		}
+		newState := interpretCode(str[offset[0]:offset[1]], state)
 
 		if !newState.equals(state) {
 			if state != nil {
 				// Update last offset
-				(&offsets[len(offsets)-1]).offset[1] = int32(output.Len())
+				(&offsets[len(offsets)-1]).offset[1] = int32(utf8.RuneCount(output.Bytes()))
 			}
 
 			if newState.colored() {
@@ -67,7 +73,7 @@ func extractColor(str *string) (*string, []ansiOffset) {
 		idx = offset[1]
 	}
 
-	rest := (*str)[idx:]
+	rest := str[idx:]
 	if len(rest) > 0 {
 		output.WriteString(rest)
 		if state != nil {
@@ -75,8 +81,13 @@ func extractColor(str *string) (*string, []ansiOffset) {
 			(&offsets[len(offsets)-1]).offset[1] = int32(utf8.RuneCount(output.Bytes()))
 		}
 	}
-	outputStr := output.String()
-	return &outputStr, offsets
+	if proc != nil {
+		proc(rest, state)
+	}
+	if len(offsets) == 0 {
+		return output.String(), nil, state
+	}
+	return output.String(), &offsets, state
 }
 
 func interpretCode(ansiCode string, prevState *ansiState) *ansiState {

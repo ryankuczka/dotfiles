@@ -4,22 +4,29 @@ package util
 import "C"
 
 import (
+	"math"
 	"os"
+	"os/exec"
 	"time"
 )
 
 // Max returns the largest integer
-func Max(first int, items ...int) int {
-	max := first
-	for _, item := range items {
-		if item > max {
-			max = item
-		}
+func Max(first int, second int) int {
+	if first >= second {
+		return first
 	}
-	return max
+	return second
 }
 
-// Max32 returns the smallest 32-bit integer
+// Min returns the smallest integer
+func Min(first int, second int) int {
+	if first <= second {
+		return first
+	}
+	return second
+}
+
+// Min32 returns the smallest 32-bit integer
 func Min32(first int32, second int32) int32 {
 	if first <= second {
 		return first
@@ -57,6 +64,15 @@ func Constrain(val int, min int, max int) int {
 	return val
 }
 
+func AsUint16(val int) uint16 {
+	if val > math.MaxUint16 {
+		return math.MaxUint16
+	} else if val < 0 {
+		return 0
+	}
+	return uint16(val)
+}
+
 // DurWithin limits the given time.Duration with the upper and lower bounds
 func DurWithin(
 	val time.Duration, min time.Duration, max time.Duration) time.Duration {
@@ -69,22 +85,16 @@ func DurWithin(
 	return val
 }
 
-func Between(val int, min int, max int) bool {
-	return val >= min && val <= max
-}
-
 // IsTty returns true is stdin is a terminal
 func IsTty() bool {
 	return int(C.isatty(C.int(os.Stdin.Fd()))) != 0
 }
 
-func TrimRight(runes *[]rune) []rune {
-	var i int
-	for i = len(*runes) - 1; i >= 0; i-- {
-		char := (*runes)[i]
-		if char != ' ' && char != '\t' {
-			break
-		}
+// ExecCommand executes the given command with $SHELL
+func ExecCommand(command string) *exec.Cmd {
+	shell := os.Getenv("SHELL")
+	if len(shell) == 0 {
+		shell = "sh"
 	}
-	return (*runes)[0 : i+1]
+	return exec.Command(shell, "-c", command)
 }
