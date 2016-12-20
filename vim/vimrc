@@ -2,13 +2,12 @@
 
 " Basic Setup:
 " ============
-set nocompatible
 filetype plugin indent on
 
 " Load Plugins: {{{1
 " =============
 call plug#begin()
-Plug '/repos/vim-pyfold'
+Plug 'ryankuczka/vim-pyfold'
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-rhubarb'
 Plug 'tpope/vim-surround'
@@ -19,21 +18,17 @@ Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-vinegar'
 Plug 'tpope/vim-eunuch'
 Plug 'tpope/vim-characterize'
-Plug 'takac/vim-commandcaps'
+Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+Plug 'junegunn/fzf.vim'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'mbbill/undotree', { 'on': 'UndotreeToggle' }
 Plug 'Yggdroot/indentLine'
 Plug 'suan/vim-instant-markdown', { 'for': 'markdown' }
-Plug 'majutsushi/tagbar'
-Plug 'ctrlpvim/ctrlp.vim'
-Plug 'JazzCore/ctrlp-cmatcher'
 Plug 'Lokaltog/vim-easymotion'
 Plug 'airblade/vim-gitgutter'
 Plug 'wellle/targets.vim'
 Plug 'haya14busa/incsearch.vim'
-Plug 'jlanzarotta/bufexplorer'
-Plug 'guns/xterm-color-table.vim'
 Plug 'ap/vim-css-color'
 Plug 'Konfekt/FastFold'
 Plug 'PeterRincker/vim-argumentative'
@@ -44,8 +39,10 @@ if exists('$TMUX')
 endif
 if has('nvim')
   Plug 'benekastah/neomake'
-  Plug 'Shougo/deoplete.nvim'
-  Plug 'zchee/deoplete-jedi'
+  Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+  Plug 'zchee/deoplete-jedi', { 'for': 'python' }
+  Plug 'carlitux/deoplete-ternjs', { 'for': 'javascript' }
+  Plug 'ternjs/tern_for_vim', { 'do': 'npm install' }
 else
   Plug 'scrooloose/syntastic'
   Plug 'Valloric/YouCompleteMe'
@@ -56,6 +53,7 @@ Plug 'altercation/vim-colors-solarized'
 Plug 'nanotech/jellybeans.vim'
 Plug 'w0ng/vim-hybrid'
 Plug 'whatyouhide/vim-gotham'
+Plug 'morhetz/gruvbox'
 " Syntax Files {{{2
 Plug 'hdima/python-syntax'
 Plug 'evanmiller/nginx-vim-syntax'
@@ -100,8 +98,6 @@ if has('nvim')
   " Deoplete {{{2
   let g:deoplete#enable_at_startup = 1
 
-  let g:deoplete#sources#jedi#show_docstring = 1
-
   inoremap <silent><expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
   inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
   inoremap <expr> <C-h> deoplete#mappings#smart_close_popup()."\<C-h>"
@@ -110,6 +106,12 @@ if has('nvim')
 
 " Vim Specific
 else
+  " YouCompleteMe {{{2
+  let g:ycm_complete_in_comments = 1
+  let g:ycm_python_binary_path = "python3"
+  let g:ycm_collect_identifiers_from_tags_files = 1
+  let g:ycm_collect_identifiers_from_comments_and_strings = 1
+  " }}}2
   " Syntastic {{{2
   nnoremap <C-S> :SyntasticCheck<CR>
   let g:syntastic_mode_map = {'mode': 'passive'}
@@ -121,11 +123,6 @@ else
   let g:syntastic_javascript_jshint_args='--config /sites/ycharts/confs/developers/jshint_conf.json'
   let g:syntastic_sh_checkers=["shellcheck"]
   let g:syntastic_json_checkers=["jsonlint"]
-
-  " YouCompleteMe {{{2
-  let g:ycm_complete_in_comments = 1
-  let g:ycm_collect_identifiers_from_tags_files = 1
-  let g:ycm_collect_identifiers_from_comments_and_strings = 1
   " }}}2
 endif
 
@@ -136,12 +133,18 @@ nnoremap <Leader>gs <C-W>o:Gstatus<CR>
 nnoremap <Leader>gb :.Gbrowse<CR>
 vnoremap <Leader>gb :Gbrowse<CR>
 
-" CommandCaps {{{2
-let g:commandcaps_override = 1
+" fzf {{{2
+let g:fzf_buffers_jump = 1
+
+nnoremap <C-P> :Files<CR>
+
+nmap <leader><leader><tab> <plug>(fzf-maps-n)
+xmap <leader><leader><tab> <plug>(fzf-maps-x)
+omap <leader><leader><tab> <plug>(fzf-maps-o)
 
 " Airline {{{2
 let g:airline_powerline_fonts=1
-let g:airline_theme='lucius'
+let g:airline_theme='gruvbox'
 let g:airline#extensions#hunks#non_zero_only = 1
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#show_buffers = 0
@@ -157,14 +160,6 @@ let g:indentLine_setColors = 0
 
 " Instant Markdown {{{2
 let g:instant_markdown_slow = 1
-
-" CtrlP {{{2
-let g:ctrlp_working_path_mode='wra'
-let g:ctrlp_max_files=0
-let g:ctrlp_user_command=['.git', 'cd %s && git ls-files . -co --exclude-standard', 'ag %s -l --nocolor -g ""']
-let g:ctrlp_match_func={'match' : 'matcher#cmatch'}
-let g:ctrlp_extensions=['buffertag']
-let g:ctrlp_mruf_relative=1
 
 " EasyMotion {{{2
 let g:EasyMotion_do_mapping = 0
@@ -197,23 +192,6 @@ map g# <Plug>(incsearch-nohl-g#)N
 " n always forward / N always backward
 let g:incsearch#consistent_n_direction = 1
 
-" BufExplorer {{{2
-let g:bufExplorerDisableDefaultKeyMapping = 1
-let g:bufExplorerSplitBelow = 1
-let g:bufExplorerSplitHorzSize = 15
-
-nnoremap <silent> <Leader>b :BufExplorerHorizontalSplit<CR>
-
-" TagBar {{{2
-let g:tagbar_left = 1
-let g:tagbar_autofocus = 1
-nnoremap <silent> <Leader>o :TagbarToggle<CR>
-
-" NERDTree {{{2
-nnoremap <silent> <Leader>d :NERDTreeToggle<CR>
-nnoremap <silent> <Leader>l :NERDTreeFind<CR>
-let NERDTreeRespectWildIgnore = 1
-
 " Argumentative {{{2
 let g:argumentative_no_mappings = 1
 nmap [, <Plug>Argumentative_Prev
@@ -229,7 +207,7 @@ let g:python_highlight_space_errors = 0
 
 " Javascript Syntax {{{2
 let g:javascript_ignore_javaScriptdoc = 1
-let g:used_javascript_libs = 'angularjs,underscore'
+let g:used_javascript_libs = 'jquery,angularjs,underscore'
 
 " Miscellaneous Functions And Commands:
 " =====================================
@@ -246,7 +224,7 @@ let g:lucius_contrast = 'low'
 " }}}3
 
 set background=dark
-colorscheme lucius
+colorscheme gruvbox
 
 if g:colors_name == 'solarized'
   hi Folded cterm=bold gui=bold
@@ -371,6 +349,9 @@ endif
 
 " Neovim Options {{{2
 if has('nvim')
+  " Enable true color support
+  set termguicolors
+
   " Bar cursor in insert mode
   let $NVIM_TUI_ENABLE_CURSOR_SHAPE=1
 
@@ -459,6 +440,7 @@ function! InsertDebugTrace()
   elseif (&ft == 'javascript')
     normal! Odebugger;
   endif
+  update
 endfunction
 
 " Scratch Buffers: {{{1
@@ -526,20 +508,11 @@ function! Prettify()
     exe '%!xmllint --format -'
   elseif &ft == 'json'
     exe '%!python -m json.tool'
+  elseif &ft == 'html' || &ft == 'htmldjango'
+    exe '%!python -Wignore -c "from bs4 import BeautifulSoup;import sys;s=BeautifulSoup(sys.stdin.read());print(s.prettify())"'
   endif
 endfunction
 command! Prettify call Prettify()
-
-" Ag: {{{1
-function! Ag(...)
-  if a:0 == 0
-    execute 'grep! '.substitute(getreg('/'), '\\<\|\\>', '\\\\b', 'g')
-  else
-    execute 'grep! '.join(a:000, ' ')
-  endif
-  botright copen
-endfunction
-command! -nargs=* Ag call Ag(<f-args>)
 
 " TabNew: {{{1
 function! TabNew(dir)
