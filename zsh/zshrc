@@ -85,6 +85,7 @@ HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND="bg=yellow,fg=black,bold"
 source $DOTFILES_DIR/zsh/autoenv/activate.sh
 
 # fzf
+export FZF_DEFAULT_COMMAND="rg --files --no-ignore --hidden --follow --glob '!.git/*' --glob '!__pycache__/*' --glob '!node_modules/*'"
 [[ -s ~/.fzf.zsh ]] && source ~/.fzf.zsh
 
 # RVM

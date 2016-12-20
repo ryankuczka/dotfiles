@@ -153,23 +153,6 @@ man() {
         man "$@"
 }
 
-# Terminal Notifier
-tn() {
-    if [[ ! -x /Applications/terminal-notifier.app/Conents/MacOS/terminal-notifer ]]; then
-        echo "terminal-notifier is not installed!"
-        return 1
-    fi
-    local message="Process has finished"
-    if [[ $1 == "-message" ]]; then
-        message=$2
-        shift; shift;
-    fi
-    local prog=$1
-    shift
-    $prog $@
-    /Applications/terminal-notifier.app/Contents/MacOS/terminal-notifier -message "$message" -subtitle "$prog" > /dev/null
-}
-
 # Nice ps
 psgrep() {
     local PSOUT="$(ps -o "user,pid,ppid,pcpu,pmem,start,etime,command" -e)"
@@ -181,21 +164,8 @@ psgrep() {
     fi
 }
 
-# Texting!
-txt() {
-    local number="3032634659"
-
-    if [[ $1 =~ "[0-9]+" ]]; then
-        number="$1"
-        shift
-    fi
-
-    if [[ $# -eq 0 ]]; then
-        echo "You must supply a message!" >&2
-        return 1
-    fi
-
-    local message="$@"
-
-    sendmail -f "mathwiz1991@gmail.com" "$number@vtext.com" <<< "$message"
+# Docker
+dkclean() {
+    docker rm $(docker ps -a -q -f status=exited)
+    docker rmi $(docker images -q -f dangling=true)
 }
