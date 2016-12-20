@@ -10,3 +10,4 @@ node_modules/*
 .tern-project
 migrate.py
 *.vim-rplugin~
+cache/*
