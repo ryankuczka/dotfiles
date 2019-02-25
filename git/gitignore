@@ -11,3 +11,5 @@ node_modules/*
 migrate.py
 *.vim-rplugin~
 cache/*
+*.ipynb
+.ipynb_checkpoints/*

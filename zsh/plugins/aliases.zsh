@@ -18,6 +18,7 @@ alias history='fc -fl 1'
 alias -g H='| head'
 alias -g T='| tail'
 alias -g G='| grep'
+alias -g V='| grep -v'
 alias -g L='| less'
 alias -g M='| more'
 alias -g NE='2> /dev/null'
@@ -72,8 +73,8 @@ alias gsts='git stash show --text'
 alias gstp='git stash pop'
 alias gstd='git stash drop'
 alias gss="git status -sb"
-alias glg="git --no-pager log -n 25 --format=format:'%C(reset)%C(yellow)%h - %C(red)%ar%C(reset) %C(green)<%an> %C(reset)%s%C(bold yellow)%d'"
-alias glgg="git log --format=format:'%C(reset)%C(yellow)%h - %C(red)%ar%C(reset) %C(green)<%an> %C(reset)%s%C(bold yellow)%d'"
+alias glg="git --no-pager log -n 25 --format=format:'%C(reset)%C(yellow)%h - %C(red)%ar%C(reset) %C(green)<%an> %C(reset)%s%C(yellow)%d'"
+alias glgg="git log --format=format:'%C(reset)%C(yellow)%h - %C(red)%ar%C(reset) %C(green)<%an> %C(reset)%s%C(yellow)%d'"
 alias gf="git fetch"
 
 # Pretty Printing JSON
@@ -93,3 +94,6 @@ alias youtube='web_search duckduckgo \!yt'
 
 # Misc
 alias tree="tree -I '*.pyc|*.un~|*.sw[op]|*node_modules*|%*|.DS_Store|.git' -Ca"
+
+# Docker Compose
+alias dc='docker-compose'
