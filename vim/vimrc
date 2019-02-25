@@ -38,14 +38,13 @@ if exists('$TMUX')
   Plug 'tmux-plugins/vim-tmux-focus-events'
   Plug 'tmux-plugins/vim-tmux'
 endif
+Plug 'w0rp/ale'
 if has('nvim')
-  Plug 'benekastah/neomake'
   Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
   Plug 'zchee/deoplete-jedi', { 'for': 'python' }
   Plug 'carlitux/deoplete-ternjs', { 'for': 'javascript' }
   Plug 'ternjs/tern_for_vim', { 'do': 'npm install' }
 else
-  Plug 'scrooloose/syntastic'
   Plug 'Valloric/YouCompleteMe'
 endif
 " Color Schemes {{{2
@@ -79,27 +78,6 @@ let g:maplocalleader = ','
 " ==================
 " Nvim Specific
 if has('nvim')
-  " Neomake {{{2
-  nnoremap <C-S> :Neomake<CR>
-  let g:neomake_open_list = 2
-  let g:neomake_python_flake8_maker = {
-    \ 'args': ['--ignore', 'E501,E128,E261,E262,E402']
-    \ }
-  let g:neomake_python_enabled_makers = ['flake8']
-  let g:neomake_javascript_jshint_maker = {
-    \ 'args': ['--config', '/sites/ycharts/confs/developers/jshint_conf.json'],
-    \ 'errorformat': '%f: line %l\, col %v\, %m',
-    \ }
-  let g:neomake_javascript_enabled_makers = ['jshint']
-  let g:neomake_error_sign = {
-    \ 'text': '✖',
-    \ 'texthl': 'ErrorMsg',
-    \ }
-  let g:neomake_warning_sign = {
-    \ 'text': '⚠',
-    \ 'texthl': 'WarningMsg',
-    \ }
-
   " Deoplete {{{2
   let g:deoplete#enable_at_startup = 1
 
@@ -117,21 +95,24 @@ else
   let g:ycm_collect_identifiers_from_tags_files = 1
   let g:ycm_collect_identifiers_from_comments_and_strings = 1
   " }}}2
-  " Syntastic {{{2
-  nnoremap <C-S> :SyntasticCheck<CR>
-  let g:syntastic_mode_map = {'mode': 'passive'}
-  let g:syntastic_auto_loc_list=1
-  let g:syntastic_check_on_open=1
-  let g:syntastic_python_checkers=["flake8"]
-  let g:syntastic_python_flake8_args='--ignore=E501,E128,E261,E262,E731'
-  let g:syntastic_javascript_checkers=["jshint"]
-  let g:syntastic_javascript_jshint_args='--config /sites/ycharts/confs/developers/jshint_conf.json'
-  let g:syntastic_sh_checkers=["shellcheck"]
-  let g:syntastic_json_checkers=["jsonlint"]
-  " }}}2
 endif
 
 " General Plugins
+" ALE {{{2
+nnoremap <C-S> :ALELint<CR>
+let g:ale_lint_on_text_changed = 'never'
+let g:ale_open_list = 1
+let g:ale_linters = {
+      \ 'javascript': ['eslint'],
+      \ 'javascript.jsx': ['eslint'],
+      \ }
+let g:ale_python_flake8_options = '--max-line-length 120 --ignore E128,E261,E262,E402'
+
+augroup AutoCloseLocList
+  autocmd!
+  autocmd BufWinLeave * if &filetype != 'qf' | silent! lclose | endif
+augroup END
+
 " Fugitive {{{2
 nnoremap <Leader>gs <C-W>o:Gstatus<CR>15<C-W>_
 " open the current file on github
