@@ -85,6 +85,9 @@ HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND="bg=yellow,fg=black,bold"
 export FZF_DEFAULT_COMMAND="rg --files --no-ignore --hidden --follow --glob '!.git/*' --glob '!__pycache__/*' --glob '!node_modules/*'"
 [[ -s ~/.fzf.zsh ]] && source ~/.fzf.zsh
 
+# direnv
+eval "$(direnv hook zsh)"
+
 # RVM
 path=($path $HOME/.rvm/bin)
 fpath=($HOME/.rvm/scripts/zsh/Completion $fpath)
