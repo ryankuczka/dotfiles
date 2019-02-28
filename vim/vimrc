@@ -106,7 +106,7 @@ let g:ale_linters = {
       \ 'javascript': ['eslint'],
       \ 'javascript.jsx': ['eslint'],
       \ }
-let g:ale_python_flake8_options = '--max-line-length 120 --ignore E128,E261,E262,E402'
+let g:ale_python_flake8_options = '--max-line-length 120 --ignore E128,E261,E262,E402,W504'
 
 augroup AutoCloseLocList
   autocmd!
@@ -419,7 +419,7 @@ augroup FileTypeConfs
   autocmd BufRead,BufNewFile *.html set filetype=htmldjango
   autocmd BufRead,BufNewFile *.tpl set filetype=htmldjango
   autocmd BufRead,BufNewFile *.md set filetype=markdown
-  autocmd BufRead,BufNewFile *.sh,zshrc,*deployment_notes.txt let b:is_bash=1 | set filetype=sh
+  autocmd BufRead,BufNewFile *.sh,zshrc,.env* let b:is_bash=1 | set filetype=sh
   autocmd BufRead,BufNewFile *requirements*.txt set filetype=config
 augroup END " }}}1
 

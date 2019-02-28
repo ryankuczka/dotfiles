@@ -1,5 +1,6 @@
 export DOTFILES_DIR=/repos/dotfiles
 export PROMPT_STYLE="async"
+
 ##################
 # MISC ZSH OPTIONS
 ##################
@@ -33,7 +34,7 @@ path=(/usr/local/bin $path $HOME/bin /usr/local/share/npm/bin)
 # Don't edit default merge commit messages
 export GIT_MERGE_AUTOEDIT=no
 # Set editor to gvim
-export EDITOR="/usr/local/bin/nvim"
+export EDITOR="/usr/local/bin/vim"
 export PAGER="less"
 export LESS="-RXE"
 export CLICOLOR=1
@@ -81,8 +82,11 @@ bindkey "$terminfo[kcud1]" history-substring-search-down
 # Change highlighting of history substring search
 HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND="bg=yellow,fg=black,bold"
 
+# Auto-Suggestions
+source $DOTFILES_DIR/zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
+
 # fzf
-export FZF_DEFAULT_COMMAND="rg --files --no-ignore --hidden --follow --glob '!.git/*' --glob '!__pycache__/*' --glob '!node_modules/*'"
+export FZF_DEFAULT_COMMAND="rg --files --no-ignore --hidden --follow --glob '!.git/*' --glob '!__pycache__/*' --glob '!node_modules/*' --glob '!*.pyc' --glob '!assets/bundles/*'"
 [[ -s ~/.fzf.zsh ]] && source ~/.fzf.zsh
 
 # direnv
@@ -92,6 +96,7 @@ eval "$(direnv hook zsh)"
 path=($path $HOME/.rvm/bin)
 fpath=($HOME/.rvm/scripts/zsh/Completion $fpath)
 [[ -s $HOME/.rvm/scripts/rvm ]] && source $HOME/.rvm/scripts/rvm
+eval "$(rbenv init -)"
 
 # Thefuck
 which thefuck > /dev/null && eval $(thefuck --alias)

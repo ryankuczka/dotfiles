@@ -4,6 +4,7 @@
 .DS_Store
 tags
 .env
+.envrc
 node_modules/*
 .agignore
 *.egg-info
