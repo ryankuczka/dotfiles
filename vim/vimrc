@@ -45,7 +45,8 @@ if has('nvim')
   Plug 'carlitux/deoplete-ternjs', { 'for': 'javascript' }
   Plug 'ternjs/tern_for_vim', { 'do': 'npm install' }
 else
-  Plug 'Valloric/YouCompleteMe'
+  Plug 'neoclide/coc.nvim', { 'do': 'yarn install --frozen-lockfile' }
+  " Plug 'Valloric/YouCompleteMe'
 endif
 " Color Schemes {{{2
 Plug 'jonathanfilip/vim-lucius'
@@ -55,7 +56,7 @@ Plug 'w0ng/vim-hybrid'
 Plug 'whatyouhide/vim-gotham'
 Plug 'morhetz/gruvbox'
 " Syntax Files {{{2
-Plug 'hdima/python-syntax'
+Plug 'vim-python/python-syntax'
 Plug 'chr4/nginx.vim'
 Plug 'groenewege/vim-less'
 Plug 'hail2u/vim-css3-syntax'
@@ -69,6 +70,8 @@ Plug 'ingydotnet/yaml-vim'
 Plug 'octol/vim-cpp-enhanced-highlight'
 Plug 'pearofducks/ansible-vim'
 Plug 'Matt-Deacalion/vim-systemd-syntax'
+Plug 'posva/vim-vue'
+Plug 'hashivim/vim-terraform'
 call plug#end() " }}}1
 
 let g:mapleader = ','
@@ -95,6 +98,60 @@ else
   let g:ycm_collect_identifiers_from_tags_files = 1
   let g:ycm_collect_identifiers_from_comments_and_strings = 1
   " }}}2
+  " CoC.nvim {{{2
+  set nobackup
+  set nowritebackup
+  set cmdheight=2
+  set updatetime=300
+  set shortmess+=c
+  set signcolumn=yes
+
+  " Use tab to trigger completion with characters ahead and navigate
+  inoremap <silent><expr> <Tab> pumvisible() ? "\<C-n>" : <SID>check_back_space() ? "\<Tab>" : coc#refresh()
+  inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<C-h>"
+
+  function! s:check_back_space() abort
+    let col = col('.') - 1
+    return !col || getline('.')[col - 1] =~# '\s'
+  endfunction
+
+  inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+
+  " Use K to show documentation in preview window
+  nnoremap <silent> K :call <SID>show_documentation()<CR>
+
+  function! s:show_documentation()
+    if (index(['vim', 'help'], &filetype) >= 0)
+      execute 'h '.expand('<cword>')
+    else
+      call CocAction('doHover')
+    endif
+  endfunction
+
+  " Highlight symbol under cursor on CursorHold
+  autocmd CursorHold * silent call CocActionAsync('highlight')
+
+  " Update lightline on status change
+  autocmd User CocStatusChange,CocDiagnosticChange call lightline#update()
+
+  " CocList
+  " Show all diagnostics
+  nnoremap <silent> <space>a :<C-u>CocList diagnostics<CR>
+  " Manage extensions
+  nnoremap <silent> <space>e  :<C-u>CocList extensions<cr>
+  " Show commands
+  nnoremap <silent> <space>c  :<C-u>CocList commands<cr>
+  " Find symbol of current document
+  nnoremap <silent> <space>o  :<C-u>CocList outline<cr>
+  " Search workspace symbols
+  nnoremap <silent> <space>s  :<C-u>CocList -I symbols<cr>
+  " Do default action for next item.
+  nnoremap <silent> <space>j  :<C-u>CocNext<CR>
+  " Do default action for previous item.
+  nnoremap <silent> <space>k  :<C-u>CocPrev<CR>
+  " Resume latest coc list
+  nnoremap <silent> <space>p  :<C-u>CocListResume<CR>
+  " }}}2
 endif
 
 " General Plugins
@@ -106,7 +163,7 @@ let g:ale_linters = {
       \ 'javascript': ['eslint'],
       \ 'javascript.jsx': ['eslint'],
       \ }
-let g:ale_python_flake8_options = '--max-line-length 120 --ignore E128,E261,E262,E402,W504'
+let g:ale_python_flake8_options = '--ignore W503,E121,E123,E127,E128,E261,E262,E402,E501'
 
 augroup AutoCloseLocList
   autocmd!
@@ -114,10 +171,11 @@ augroup AutoCloseLocList
 augroup END
 
 " Fugitive {{{2
-nnoremap <Leader>gs <C-W>o:Gstatus<CR>15<C-W>_
+nnoremap <Leader>gs <C-W>o:G<CR>15<C-W>_
 " open the current file on github
 nnoremap <Leader>gb :.Gbrowse<CR>
 vnoremap <Leader>gb :Gbrowse<CR>
+set tags^=./.git/tags;
 
 " fzf {{{2
 let g:fzf_buffers_jump = 1
@@ -133,10 +191,11 @@ let g:lightline = {
       \ 'colorscheme': 'gruvbox',
       \ 'active': {
       \   'left': [['mode', 'paste'],
-      \            ['gitbranch', 'readonly', 'filename', 'modified']],
+      \            ['gitbranch', 'cocstatus', 'readonly', 'filename', 'modified']],
       \ },
       \ 'component_function': {
-      \   'gitbranch': 'fugitive#head'
+      \   'gitbranch': 'fugitive#head',
+      \   'cocstatus': 'coc#status'
       \ },
       \ }
 
@@ -390,6 +449,9 @@ nnoremap Q @q
 nnoremap <Leader><Leader><Space> <C-^>
 " Quick re-select pasted text
 nnoremap <expr> gp '`[' . strpart(getregtype(), 0, 1) . '`]'
+
+" Reset Syntax
+nnoremap <Leader>rs :syn sync fromstart<CR>
 
 " Syntax Debugging {{{2
 " Allows looking up the syntax under the cursor

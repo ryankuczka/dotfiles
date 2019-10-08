@@ -1,0 +1,5 @@
+{
+    "tsserver.npm": "/usr/local/bin/npm",
+    "vetur.validation.template": false,
+    "python.venvPath": "~/.virtualenvs"
+}
