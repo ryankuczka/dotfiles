@@ -3,7 +3,7 @@
 *.sw[po]
 .DS_Store
 tags
-.env
+.env*
 .envrc
 node_modules/*
 .agignore
@@ -14,3 +14,4 @@ migrate.py
 cache/*
 *.ipynb
 .ipynb_checkpoints/*
+.ignore

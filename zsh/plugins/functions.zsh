@@ -28,6 +28,12 @@ pyclean() {
     find . -type d -name "__pycache__" -delete
 }
 
+# Clean git branches
+gbclean() {
+    git branch --merged master | grep -v 'master$' | xargs git branch -d
+    git branch --remote --merged master | grep -v 'master$' | xargs git branch -dr
+}
+
 # Search from command line!
 web_search() {
     local open_cmd

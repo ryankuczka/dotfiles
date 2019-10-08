@@ -58,6 +58,11 @@ source /usr/local/bin/virtualenvwrapper.sh
 # Local zshrc
 [[ -s $HOME/.zshrc.local ]] && source "$HOME/.zshrc.local"
 
+# Set up brew autocompletion
+if type brew &>/dev/null; then
+    fpath=($(brew --prefix)/share/zsh/site-functions $fpath)
+fi
+
 # Set up compinit
 autoload -U compinit
 compinit -d $DOTFILES_DIR/zsh/cache/zcomp-${HOST/.*/}
@@ -100,6 +105,9 @@ eval "$(rbenv init -)"
 
 # Thefuck
 which thefuck > /dev/null && eval $(thefuck --alias)
+
+# Ripgrep
+export RIPGREP_CONFIG_PATH=$DOTFILES_DIR/misc/rgconfig
 
 ##########################
 # PLATFORM SPECIFIC CONFIG

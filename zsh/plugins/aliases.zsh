@@ -9,6 +9,7 @@ alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
 alias .....='cd ../../../..'
+alias ......='cd ../../../../..'
 alias md='mkdir -p'
 
 # Show history with timestamps mm/dd/yyyy

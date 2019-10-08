@@ -69,6 +69,7 @@ ln -sfv /repos/dotfiles/zsh/zshrc ~/.zshrc
 ln -sfv /repos/dotfiles/misc/agignore ~/.agignore
 ln -sfv /repos/dotfiles/tmux/tmux.conf ~/.tmux.conf
 ln -sfv /repos/dotfiles/misc/direnvrc ~/.direnvrc
+ln -sfv /repos/dotfiles/misc/rgignore ~/.rgignore
 ```
 
 ## Install Vim Plugins
