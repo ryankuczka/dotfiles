@@ -1,1 +1,1 @@
-/repos/dotfiles/vim/vimrc
+/Users/rkuczka/repos/dotfiles/vim/vimrc

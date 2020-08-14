@@ -94,7 +94,7 @@ alias wiki='web_search duckduckgo \!w'
 alias youtube='web_search duckduckgo \!yt'
 
 # Misc
-alias tree="tree -I '*.pyc|*.un~|*.sw[op]|*node_modules*|%*|.DS_Store|.git' -Ca"
+alias tree="tree -I '*.pyc|*.un~|*.sw[op]|*node_modules*|%*|.DS_Store|.git|.terraform' -Ca"
 
 # Docker Compose
 alias dc='docker-compose'

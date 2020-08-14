@@ -1,5 +1,10 @@
 {
     "tsserver.npm": "/usr/local/bin/npm",
     "vetur.validation.template": false,
-    "python.venvPath": "~/.virtualenvs"
+    "python.venvPath": "~/.virtualenvs",
+    "python.jediEnabled": false,
+    "python.linting.enabled": true,
+    "python.linting.flake8Enabled": true,
+    "python.autoComplete.extraPaths": ["~/repos/wisersaver/wisersaver"],
+    "python.analysis.diagnosticEnabled": false
 }

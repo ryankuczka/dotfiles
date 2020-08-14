@@ -39,15 +39,7 @@ if exists('$TMUX')
   Plug 'tmux-plugins/vim-tmux'
 endif
 Plug 'w0rp/ale'
-if has('nvim')
-  Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-  Plug 'zchee/deoplete-jedi', { 'for': 'python' }
-  Plug 'carlitux/deoplete-ternjs', { 'for': 'javascript' }
-  Plug 'ternjs/tern_for_vim', { 'do': 'npm install' }
-else
-  Plug 'neoclide/coc.nvim', { 'do': 'yarn install --frozen-lockfile' }
-  " Plug 'Valloric/YouCompleteMe'
-endif
+Plug 'neoclide/coc.nvim', { 'do': 'yarn install --frozen-lockfile' }
 " Color Schemes {{{2
 Plug 'jonathanfilip/vim-lucius'
 Plug 'altercation/vim-colors-solarized'
@@ -79,80 +71,60 @@ let g:maplocalleader = ','
 
 " Configure Plugins: {{{1
 " ==================
-" Nvim Specific
-if has('nvim')
-  " Deoplete {{{2
-  let g:deoplete#enable_at_startup = 1
+" CoC.nvim {{{2
+set nobackup
+set nowritebackup
+set cmdheight=2
+set updatetime=300
+set shortmess+=c
+set signcolumn=yes
 
-  inoremap <silent><expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
-  inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
-  inoremap <expr> <C-h> deoplete#mappings#smart_close_popup()."\<C-h>"
-  inoremap <expr> <BS> deoplete#mappings#smart_close_popup()."\<C-h>"
-  " }}}2
+" Use tab to trigger completion with characters ahead and navigate
+inoremap <silent><expr> <Tab> pumvisible() ? "\<C-n>" : <SID>check_back_space() ? "\<Tab>" : coc#refresh()
+inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<C-h>"
 
-" Vim Specific
-else
-  " YouCompleteMe {{{2
-  let g:ycm_complete_in_comments = 1
-  let g:ycm_python_binary_path = 'python3'
-  let g:ycm_collect_identifiers_from_tags_files = 1
-  let g:ycm_collect_identifiers_from_comments_and_strings = 1
-  " }}}2
-  " CoC.nvim {{{2
-  set nobackup
-  set nowritebackup
-  set cmdheight=2
-  set updatetime=300
-  set shortmess+=c
-  set signcolumn=yes
+function! s:check_back_space() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1] =~# '\s'
+endfunction
 
-  " Use tab to trigger completion with characters ahead and navigate
-  inoremap <silent><expr> <Tab> pumvisible() ? "\<C-n>" : <SID>check_back_space() ? "\<Tab>" : coc#refresh()
-  inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<C-h>"
+inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
 
-  function! s:check_back_space() abort
-    let col = col('.') - 1
-    return !col || getline('.')[col - 1] =~# '\s'
-  endfunction
+" Use K to show documentation in preview window
+nnoremap <silent> K :call <SID>show_documentation()<CR>
 
-  inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+function! s:show_documentation()
+  if (index(['vim', 'help'], &filetype) >= 0)
+    execute 'h '.expand('<cword>')
+  else
+    call CocAction('doHover')
+  endif
+endfunction
 
-  " Use K to show documentation in preview window
-  nnoremap <silent> K :call <SID>show_documentation()<CR>
+" Highlight symbol under cursor on CursorHold
+autocmd CursorHold * silent call CocActionAsync('highlight')
 
-  function! s:show_documentation()
-    if (index(['vim', 'help'], &filetype) >= 0)
-      execute 'h '.expand('<cword>')
-    else
-      call CocAction('doHover')
-    endif
-  endfunction
+" Update lightline on status change
+autocmd User CocStatusChange,CocDiagnosticChange call lightline#update()
 
-  " Highlight symbol under cursor on CursorHold
-  autocmd CursorHold * silent call CocActionAsync('highlight')
-
-  " Update lightline on status change
-  autocmd User CocStatusChange,CocDiagnosticChange call lightline#update()
-
-  " CocList
-  " Show all diagnostics
-  nnoremap <silent> <space>a :<C-u>CocList diagnostics<CR>
-  " Manage extensions
-  nnoremap <silent> <space>e  :<C-u>CocList extensions<cr>
-  " Show commands
-  nnoremap <silent> <space>c  :<C-u>CocList commands<cr>
-  " Find symbol of current document
-  nnoremap <silent> <space>o  :<C-u>CocList outline<cr>
-  " Search workspace symbols
-  nnoremap <silent> <space>s  :<C-u>CocList -I symbols<cr>
-  " Do default action for next item.
-  nnoremap <silent> <space>j  :<C-u>CocNext<CR>
-  " Do default action for previous item.
-  nnoremap <silent> <space>k  :<C-u>CocPrev<CR>
-  " Resume latest coc list
-  nnoremap <silent> <space>p  :<C-u>CocListResume<CR>
-  " }}}2
-endif
+" CocList
+" Show all diagnostics
+nnoremap <silent> <space>a :<C-u>CocList diagnostics<CR>
+" Manage extensions
+nnoremap <silent> <space>e  :<C-u>CocList extensions<cr>
+" Show commands
+nnoremap <silent> <space>c  :<C-u>CocList commands<cr>
+" Find symbol of current document
+nnoremap <silent> <space>o  :<C-u>CocList outline<cr>
+" Search workspace symbols
+nnoremap <silent> <space>s  :<C-u>CocList -I symbols<cr>
+" Do default action for next item.
+nnoremap <silent> <space>j  :<C-u>CocNext<CR>
+" Do default action for previous item.
+nnoremap <silent> <space>k  :<C-u>CocPrev<CR>
+" Resume latest coc list
+nnoremap <silent> <space>p  :<C-u>CocListResume<CR>
+" }}}2
 
 " General Plugins
 " ALE {{{2

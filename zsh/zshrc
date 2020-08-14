@@ -1,4 +1,4 @@
-export DOTFILES_DIR=/repos/dotfiles
+export DOTFILES_DIR=$HOME/repos/dotfiles
 export PROMPT_STYLE="async"
 
 ##################
@@ -48,7 +48,7 @@ stty stop undef
 # PYTHON VIRTUALENV
 ###################
 export WORKON_HOME=$HOME/.virtualenvs
-export VIRTUALENVWRAPPER_PYTHON=/usr/local/bin/python
+export VIRTUALENVWRAPPER_PYTHON=/usr/local/bin/python3
 export VIRTUAL_ENV_DISABLE_PROMPT=1
 source /usr/local/bin/virtualenvwrapper.sh
 
@@ -91,7 +91,7 @@ HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND="bg=yellow,fg=black,bold"
 source $DOTFILES_DIR/zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 # fzf
-export FZF_DEFAULT_COMMAND="rg --files --no-ignore --hidden --follow --glob '!.git/*' --glob '!__pycache__/*' --glob '!node_modules/*' --glob '!*.pyc' --glob '!assets/bundles/*'"
+export FZF_DEFAULT_COMMAND="rg --files --no-ignore --hidden --follow --glob '!.git/*' --glob '!__pycache__/*' --glob '!node_modules/*' --glob '!*.pyc'"
 [[ -s ~/.fzf.zsh ]] && source ~/.fzf.zsh
 
 # direnv
@@ -101,10 +101,13 @@ eval "$(direnv hook zsh)"
 path=($path $HOME/.rvm/bin)
 fpath=($HOME/.rvm/scripts/zsh/Completion $fpath)
 [[ -s $HOME/.rvm/scripts/rvm ]] && source $HOME/.rvm/scripts/rvm
-eval "$(rbenv init -)"
+# eval "$(rbenv init -)"
 
 # Thefuck
 which thefuck > /dev/null && eval $(thefuck --alias)
+
+# Go
+path=($path /usr/local/go/bin)
 
 # Ripgrep
 export RIPGREP_CONFIG_PATH=$DOTFILES_DIR/misc/rgconfig

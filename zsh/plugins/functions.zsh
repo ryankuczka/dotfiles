@@ -30,8 +30,14 @@ pyclean() {
 
 # Clean git branches
 gbclean() {
+    echo "Deleting local merged branches..."
     git branch --merged master | grep -v 'master$' | xargs git branch -d
+    echo
+    echo "Deleting remote merged branches..."
     git branch --remote --merged master | grep -v 'master$' | xargs git branch -dr
+    echo
+    echo "Pruning branches removed from origin..."
+    git remote prune origin
 }
 
 # Search from command line!
