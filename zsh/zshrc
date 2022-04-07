@@ -26,7 +26,7 @@ fpath=($DOTFILES_DIR/zsh/functions $DOTFILES_DIR/zsh/completions $fpath)
 ###################
 # Force unique entries in PATH
 typeset -Ug path
-path=(/usr/local/bin $path $HOME/bin /usr/local/share/npm/bin)
+path=(/usr/local/opt/python@3.8/bin /usr/local/bin $path $HOME/bin /usr/local/share/npm/bin)
 
 #####################
 # BASIC ENV VARIABLES
@@ -48,7 +48,7 @@ stty stop undef
 # PYTHON VIRTUALENV
 ###################
 export WORKON_HOME=$HOME/.virtualenvs
-export VIRTUALENVWRAPPER_PYTHON=/usr/local/bin/python3
+export VIRTUALENVWRAPPER_PYTHON=python3
 export VIRTUAL_ENV_DISABLE_PROMPT=1
 source /usr/local/bin/virtualenvwrapper.sh
 

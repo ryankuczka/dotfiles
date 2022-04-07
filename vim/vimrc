@@ -455,16 +455,17 @@ augroup FileTypeConfs
   autocmd BufRead,BufNewFile *.md set filetype=markdown
   autocmd BufRead,BufNewFile *.sh,zshrc,.env* let b:is_bash=1 | set filetype=sh
   autocmd BufRead,BufNewFile *requirements*.txt set filetype=config
+  autocmd BufRead,BufNewFile Dockerfile* set filetype=dockerfile
 augroup END " }}}1
 
 " Debug Statements: {{{1
 " =================
 " Insert debugger/ipdb statement
-nnoremap <silent> <Leader><C-I> :call InsertDebugTrace()<CR>
+nnoremap <silent> <Leader><Tab> :call InsertDebugTrace()<CR>
 function! InsertDebugTrace()
   if (&filetype ==# 'python')
     normal! Oimport ipdb; ipdb.set_trace()
-  elseif (&filetype ==# 'javascript')
+  elseif (&filetype ==# 'javascript' || &filetype ==# 'javascript.jsx' || &filetype ==# 'vue')
     normal! Odebugger;
   endif
   update

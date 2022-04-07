@@ -1,0 +1,13 @@
+set surround
+set easymotion
+set commentary
+
+set incsearch
+set hlsearch
+set ignorecase
+set smartcase
+set gdefault
+
+nmap / :action Find<CR>
+nmap n :action FindNext<CR>
+set ideajoin
